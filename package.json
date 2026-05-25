@@ -1,0 +1,38 @@
+{
+  "name": "google-classroom-auto-archiver",
+  "version": "0.1.0",
+  "description": "Automatic Google Classroom crawler, Drive downloader, and migration archive exporter.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/system/engine.js",
+    "engine": "node src/system/engine.js",
+    "doctor": "node src/system/preflight.js",
+    "login": "node src/auth/login.js",
+    "browser-login": "node src/auth/login.js --browser-only",
+    "crawl": "node src/crawler/run.js",
+    "export": "node src/export/export.js",
+    "backup": "node src/system/engine.js",
+    "api": "node src/api/server.js",
+    "test": "node --test",
+    "sanitize:check": "node scripts/sanitize-check.js",
+    "release:check": "npm run check && npm test && npm run sanitize:check && npm audit --audit-level=low",
+    "check": "node --check src/system/engine.js && node --check src/system/preflight.js && node --check src/crawler/run.js && node --check src/auth/login.js && node --check src/export/export.js && node --check src/api/server.js && node --check scripts/sanitize-check.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "better-sqlite3": "^11.8.1",
+    "cheerio": "^1.0.0",
+    "cli-progress": "^3.12.0",
+    "dotenv": "^16.4.7",
+    "fs-extra": "^11.2.0",
+    "googleapis": "^172.0.0",
+    "p-limit": "^6.2.0",
+    "playwright": "^1.49.1",
+    "sqlite3": "^6.0.1",
+    "winston": "^3.17.0"
+  }
+}
