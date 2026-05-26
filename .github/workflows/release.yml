@@ -17,13 +17,13 @@ jobs:
         include:
           - os: windows-latest
             artifact: classroom-downloader-win.exe
-            command: npx caxa --input . --output "classroom-downloader-win.exe" -- "{{caxa}}/node_modules/node/bin/node.exe" "{{caxa}}/src/system/engine.js"
+            command: npx caxa --input . --output "classroom-downloader-win.exe" -- "{{caxa}}/node_modules/node/bin/node.exe" "{{caxa}}/src/api/server.js"
           - os: ubuntu-latest
             artifact: classroom-downloader-linux
-            command: npx caxa --input . --output "classroom-downloader-linux" -- "{{caxa}}/node_modules/node/bin/node" "{{caxa}}/src/system/engine.js"
+            command: npx caxa --input . --output "classroom-downloader-linux" -- "{{caxa}}/node_modules/node/bin/node" "{{caxa}}/src/api/server.js"
           - os: macos-latest
             artifact: classroom-downloader-mac
-            command: npx caxa --input . --output "classroom-downloader-mac" -- "{{caxa}}/node_modules/node/bin/node" "{{caxa}}/src/system/engine.js"
+            command: npx caxa --input . --output "classroom-downloader-mac" -- "{{caxa}}/node_modules/node/bin/node" "{{caxa}}/src/api/server.js"
 
     steps:
       - name: Checkout repository
