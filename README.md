@@ -90,7 +90,16 @@ erDiagram
   }
 ```
 
-## Quick Start
+## Standalone Application (No Dependencies)
+
+You can run this application without installing Node.js, Playwright, or any other dependencies. Standalone executables for Windows, macOS, and Linux are available for every release.
+
+1. Go to the [GitHub Releases](https://github.com/grloper/google-classroom-auto-archiver/releases) page.
+2. Download the executable for your operating system (`classroom-downloader-win.exe`, `classroom-downloader-mac`, or `classroom-downloader-linux`).
+3. Place the executable in an empty folder (it will create output directories and databases next to it).
+4. Run the executable. It will automatically use your system's Google Chrome or Microsoft Edge for any browser-based authentication.
+
+## Quick Start (For Developers)
 
 1. Install dependencies:
 

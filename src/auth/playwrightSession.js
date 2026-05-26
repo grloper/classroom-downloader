@@ -9,13 +9,24 @@ export async function launchClassroomContext(options = {}) {
   await fs.ensureDir(activeConfig.session.userDataDir);
   await fs.ensureDir(activeConfig.paths.outputRoot);
 
-  return chromium.launchPersistentContext(activeConfig.session.userDataDir, {
+  const contextOptions = {
     headless: options.headless ?? activeConfig.headless,
     acceptDownloads: true,
     downloadsPath: activeConfig.paths.outputRoot,
     viewport: { width: 1440, height: 1000 },
     locale: 'en-US'
-  });
+  };
+
+  try {
+    return await chromium.launchPersistentContext(activeConfig.session.userDataDir, { ...contextOptions, channel: 'chrome' });
+  } catch (err) {
+    try {
+      return await chromium.launchPersistentContext(activeConfig.session.userDataDir, { ...contextOptions, channel: 'msedge' });
+    } catch (err2) {
+      // Fallback to downloaded playwright chromium if available
+      return await chromium.launchPersistentContext(activeConfig.session.userDataDir, contextOptions);
+    }
+  }
 }
 
 export async function saveStorageState(context, activeConfig = config) {
