@@ -9,6 +9,7 @@ npm run sanitize:check
 npm run compliance:check
 npm audit --audit-level=low
 npm run doctor
+npm run build:standalone
 node src/crawler/run.js --plan-only
 node src/crawler/run.js --no-download
 ```
@@ -31,5 +32,6 @@ Recommended release command:
 ```bash
 git tag -a v0.1.0 -m "v0.1.0"
 git push origin main --follow-tags
-gh release create v0.1.0 --title "v0.1.0" --notes-file CHANGELOG.md
 ```
+
+Pushing the tag starts `.github/workflows/release.yml`, which builds the Windows, macOS, and Linux standalone executables and creates the GitHub Release.

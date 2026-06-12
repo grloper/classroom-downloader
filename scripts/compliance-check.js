@@ -9,6 +9,7 @@ const requiredFiles = [
   '.env.example',
   '.github/workflows/ci.yml',
   '.github/workflows/release.yml',
+  'docs/user-guide.md',
   'docs/release-checklist.md',
   'docs/ui-roadmap.md',
   'docs/environments.md',

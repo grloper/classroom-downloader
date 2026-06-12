@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.0 - Standalone Release UX
+
+- Added a clean staged standalone build command for local executable builds.
+- Fixed packaged UI actions so they launch the bundled crawler engine.
+- Added dashboard OAuth credential status and JSON upload.
+- Added a no-coding user guide for first run, auth, downloads, output, and troubleshooting.
+- Updated release automation to publish executables with the user guide as release notes.
+
 ## v0.1.1 - Production Workflow Hardening
 
 - Added production selective-download UI implementation prompt.

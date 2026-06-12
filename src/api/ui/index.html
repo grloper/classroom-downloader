@@ -222,16 +222,18 @@
       const [selectedCourseId, setSelectedCourseId] = useState(null);
       const [activeTab, setActiveTab] = useState('classroom');
       const [loading, setLoading] = useState(true);
+      const [setupStatus, setSetupStatus] = useState(null);
 
       const refreshData = async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-          const [resHealth, resPlan, resSel, resFiles, resCourses] = await Promise.all([
+          const [resHealth, resPlan, resSel, resFiles, resCourses, resSetup] = await Promise.all([
             fetch(`${API_BASE}/health`).catch(() => ({ ok: false })),
             fetch(`${API_BASE}/plan`).catch(() => ({ ok: false })),
             fetch(`${API_BASE}/selection`).catch(() => ({ ok: false })),
             fetch(`${API_BASE}/db/files`).catch(() => ({ ok: false })),
-            fetch(`${API_BASE}/courses`).catch(() => ({ ok: false }))
+            fetch(`${API_BASE}/courses`).catch(() => ({ ok: false })),
+            fetch(`${API_BASE}/setup/status`).catch(() => ({ ok: false }))
           ]);
 
           if (resHealth.ok) {
@@ -245,6 +247,7 @@
           if (resSel.ok) setSelection(await resSel.json() || { selection_mode: 'implicit', excluded_attachment_ids: [] });
           if (resFiles.ok) setDbFiles(await resFiles.json() || []);
           if (resCourses.ok) setCoursesData(await resCourses.json());
+          if (resSetup.ok) setSetupStatus(await resSetup.json());
         } catch (e) {
           setApiStatus({ online: false, counts: null });
           console.error("SYS.ERR: API OFFLINE", e);
@@ -283,6 +286,11 @@
       }, [plan]);
 
       const handleTriggerRefreshPlan = async () => {
+        if (setupStatus?.blocking?.length) {
+          setActiveTab('settings');
+          alert('SYS.ERR: GOOGLE_AUTH REQUIRED. OPEN CONFIG.');
+          return;
+        }
         await fetch(`${API_BASE}/plan/refresh`, { method: 'POST' });
         alert('CMD: SYNC_CLASSROOM_DATA DISPATCHED. MONITOR TERMINAL.');
       };
@@ -326,8 +334,35 @@
       };
 
       const handleStartDownload = async () => {
+        if (setupStatus?.blocking?.length) {
+          setActiveTab('settings');
+          alert('SYS.ERR: GOOGLE_AUTH REQUIRED. OPEN CONFIG.');
+          return;
+        }
         await fetch(`${API_BASE}/downloads/selected`, { method: 'POST' });
         alert('CMD: START_DOWNLOAD DISPATCHED. MONITOR TERMINAL.');
+      };
+
+      const handleCredentialsUpload = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+          const body = JSON.parse(await file.text());
+          const res = await fetch(`${API_BASE}/setup/credentials`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Upload failed');
+          setSetupStatus(data);
+          alert('SYS.MSG: OAUTH CLIENT SAVED.');
+        } catch (error) {
+          alert(`SYS.ERR: ${error.message}`);
+        } finally {
+          event.target.value = '';
+        }
       };
 
       const handleResetDatabase = async () => {
@@ -377,7 +412,7 @@
               </div>
               <h1 className="text-xl font-display font-bold tracking-widest text-textmain flex items-center gap-3">
                 CLASSROOM_ARCHIVE
-                <span className="text-[10px] bg-accent text-dark px-2 py-0.5 font-bold font-mono tracking-normal hidden sm:inline-block">V1.0.0</span>
+                <span className="text-[10px] bg-accent text-dark px-2 py-0.5 font-bold font-mono tracking-normal hidden sm:inline-block">V1.1.0</span>
               </h1>
             </div>
             <div className="flex items-center gap-4">
@@ -816,6 +851,48 @@
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className={`brutal-panel p-6 flex flex-col gap-4 md:col-span-2 ${setupStatus?.blocking?.length ? 'border-red-500 bg-red-500/5' : 'border-success bg-success/5'}`}>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-muted pb-4">
+                          <div className="flex items-center gap-3">
+                            <Icon name="key-round" className={`h-5 w-5 ${setupStatus?.blocking?.length ? 'text-red-500' : 'text-success'}`} />
+                            <h3 className="font-bold text-textmain text-sm">GOOGLE_AUTH</h3>
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-[10px] font-bold">
+                            <span className={`border px-2 py-1 ${setupStatus?.credentials?.exists ? 'border-success text-success' : 'border-red-500 text-red-500'}`}>
+                              OAUTH_JSON: {setupStatus?.credentials?.exists ? 'READY' : 'MISSING'}
+                            </span>
+                            <span className={`border px-2 py-1 ${setupStatus?.tokenExists ? 'border-success text-success' : 'border-accent text-accent'}`}>
+                              TOKEN: {setupStatus?.tokenExists ? 'READY' : 'FIRST_LOGIN'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="text-xs text-textmuted leading-relaxed font-mono border border-muted bg-dark p-4">
+                            <div className="text-textmain font-bold mb-2">CREDENTIAL_TARGET</div>
+                            <div className="break-all">{setupStatus?.credentials?.path || './credentials/oauth-client.json'}</div>
+                            {setupStatus?.credentials?.projectId && (
+                              <div className="mt-2 text-success">PROJECT: {setupStatus.credentials.projectId}</div>
+                            )}
+                          </div>
+                          <div className="flex flex-col gap-3 justify-center">
+                            <input id="credentials-upload" type="file" accept=".json,application/json" className="hidden" onChange={handleCredentialsUpload} />
+                            <label htmlFor="credentials-upload" className="brutal-btn px-4 py-3 text-xs w-full">
+                              <Icon name="upload" className="w-4 h-4"/> [ UPLOAD_OAUTH_JSON ]
+                            </label>
+                            <button onClick={() => refreshData()} className="brutal-btn secondary px-4 py-3 text-xs">
+                              <Icon name="refresh-cw" className="w-4 h-4"/> [ CHECK_AUTH_STATE ]
+                            </button>
+                          </div>
+                        </div>
+
+                        {setupStatus?.blocking?.length > 0 && (
+                          <div className="border border-red-500/60 bg-red-500/10 p-4 text-xs text-red-400 font-mono flex flex-col gap-1">
+                            {setupStatus.blocking.map((item, idx) => <div key={idx}>! {item}</div>)}
+                          </div>
+                        )}
+                      </div>
+
                       <div className="brutal-panel p-6 border-muted flex flex-col gap-4">
                         <div className="flex items-center gap-3">
                            <Icon name="folder-tree" className="h-5 w-5 text-accent" />

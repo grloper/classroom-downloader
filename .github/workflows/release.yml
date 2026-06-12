@@ -17,13 +17,10 @@ jobs:
         include:
           - os: windows-latest
             artifact: classroom-downloader-win.exe
-            command: npx caxa --input . --output "classroom-downloader-win.exe" -- "{{caxa}}/node_modules/node/bin/node.exe" "{{caxa}}/src/api/server.js"
           - os: ubuntu-latest
             artifact: classroom-downloader-linux
-            command: npx caxa --input . --output "classroom-downloader-linux" -- "{{caxa}}/node_modules/node/bin/node" "{{caxa}}/src/api/server.js"
           - os: macos-latest
             artifact: classroom-downloader-mac
-            command: npx caxa --input . --output "classroom-downloader-mac" -- "{{caxa}}/node_modules/node/bin/node" "{{caxa}}/src/api/server.js"
 
     steps:
       - name: Checkout repository
@@ -35,26 +32,17 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies and Node runtime
-        run: |
-          npm ci --omit=dev
-          npm install node@20
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Clean unnecessary files
-        shell: bash
-        run: |
-          rm -rf .git .github docs test scripts output sessions
-
-      - name: Build Executable with Caxa
-        run: |
-          npx caxa@3.0.1 --version
-          ${{ matrix.command }}
+      - name: Build standalone executable
+        run: npm run build:standalone
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
 
   create-release:
     name: Create GitHub Release
@@ -82,7 +70,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: CHANGELOG.md
+          body_path: docs/user-guide.md
           generate_release_notes: true
           files: release-assets/*
-

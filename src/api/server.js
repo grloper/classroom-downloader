@@ -8,6 +8,8 @@ import { config } from '../config.js';
 import { ensureProjectFolders } from '../utils/paths.js';
 import { createLogger } from '../utils/logger.js';
 import { exportArchive, exportDownloadPlan } from '../storage/exporter.js';
+import { getSourcePath, quoteForCmd } from '../utils/runtimePaths.js';
+import { getPreflightStatus } from '../system/preflight.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,15 +30,18 @@ function sendJson(response, statusCode, payload) {
 }
 
 function runEngineDetached(args) {
+  const engineScript = getSourcePath('system', 'engine.js');
+
   if (process.platform === 'win32') {
     // Open a visible CMD window so the user sees the download progress
-    const child = spawn('cmd.exe', ['/c', 'start', 'cmd.exe', '/k', process.execPath, 'src/system/engine.js', ...args], {
+    const command = [process.execPath, engineScript, ...args].map(quoteForCmd).join(' ');
+    const child = spawn('cmd.exe', ['/d', '/s', '/c', 'start', '"Classroom Downloader Engine"', 'cmd.exe', '/k', command], {
       detached: true,
       stdio: 'ignore'
     });
     child.unref();
   } else {
-    const child = spawn(process.execPath, ['src/system/engine.js', ...args], {
+    const child = spawn(process.execPath, [engineScript, ...args], {
       detached: true,
       stdio: 'ignore'
     });
@@ -58,6 +63,18 @@ async function jsonBody(request) {
   });
 }
 
+function validateOAuthClientJson(raw) {
+  const source = raw?.installed || raw?.web || raw || {};
+
+  if (!source.client_id || !source.client_secret) {
+    throw new Error('The selected file is not a Google OAuth client JSON file.');
+  }
+
+  if (raw?.web) {
+    throw new Error('This is a Web app OAuth client. Create and upload a Desktop app OAuth client.');
+  }
+}
+
 async function main() {
   await ensureProjectFolders(config);
   const logger = await createLogger(config);
@@ -75,7 +92,7 @@ async function main() {
       return;
     }
 
-    const db = new ArchiveDatabase(config.paths.dbPath);
+    let db = null;
 
     try {
       if (method === 'GET') {
@@ -111,6 +128,22 @@ async function main() {
           return;
         }
       }
+
+      if (url.pathname === '/setup/status' && method === 'GET') {
+        sendJson(response, 200, await getPreflightStatus(config));
+        return;
+      }
+
+      if (url.pathname === '/setup/credentials' && method === 'POST') {
+        const body = await jsonBody(request);
+        validateOAuthClientJson(body);
+        await fs.promises.mkdir(path.dirname(config.google.applicationCredentials), { recursive: true });
+        await fs.promises.writeFile(config.google.applicationCredentials, JSON.stringify(body, null, 2));
+        sendJson(response, 200, await getPreflightStatus(config));
+        return;
+      }
+
+      db = new ArchiveDatabase(config.paths.dbPath);
 
       if (url.pathname === '/health' && method === 'GET') {
         sendJson(response, 200, { ok: true, counts: db.getCounts() });
@@ -231,7 +264,7 @@ async function main() {
     } catch (error) {
       sendJson(response, 500, { error: error.message });
     } finally {
-      db.close();
+      if (db) db.close();
     }
   });
 

@@ -1,6 +1,6 @@
 {
   "name": "google-classroom-auto-archiver",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Automatic Google Classroom crawler, Drive downloader, and migration archive exporter.",
   "type": "module",
   "private": true,
@@ -19,6 +19,8 @@
     "api": "node src/api/server.js",
     "ui": "node src/api/server.js",
     "ui:dev": "node src/api/server.js",
+    "build:standalone": "node scripts/build-standalone.js",
+    "build:exe": "node scripts/build-standalone.js",
     "test": "node --test",
     "sanitize:check": "node scripts/sanitize-check.js",
     "compliance:check": "node scripts/compliance-check.js",
