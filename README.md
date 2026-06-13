@@ -90,14 +90,17 @@ erDiagram
   }
 ```
 
-## Standalone Application (No Dependencies)
+## Standalone Application (No Coding Required)
 
-You can run this application without installing Node.js, Playwright, or any other dependencies. Standalone executables for Windows, macOS, and Linux are available for every release.
+You can run this application without installing Node.js, Playwright, Docker, or developer tools. Standalone executables for Windows, macOS, and Linux are available for every release.
 
 1. Go to the [GitHub Releases](https://github.com/grloper/google-classroom-auto-archiver/releases) page.
 2. Download the executable for your operating system (`classroom-downloader-win.exe`, `classroom-downloader-mac`, or `classroom-downloader-linux`).
 3. Place the executable in an empty folder (it will create output directories and databases next to it).
-4. Run the executable. It will automatically open the UI dashboard in your browser and use your system's Google Chrome or Microsoft Edge for any authentication.
+4. Run the executable. It opens the local dashboard in your browser.
+5. Follow the [user guide](docs/user-guide.md) to upload your Google OAuth Desktop app JSON, sign in, choose what to download, and start the archive.
+
+Google requires every user or school to create their own OAuth Desktop app before first login. The app helps you upload that JSON through the local dashboard and keeps the token on your computer.
 
 ## Quick Start (For Developers)
 
@@ -168,6 +171,7 @@ npm run login         # auth-only repair command
 npm run crawl         # low-level crawl/download/export command
 npm run export        # regenerate JSON from SQLite
 npm run api           # local JSON API for future frontend work
+npm run build:standalone # build a local portable executable for this OS
 npm run sanitize:check # verify public files do not contain obvious private data
 npm run compliance:check # validate local-only and release safety rules
 npm run release:check # check, test, sanitize, compliance, audit

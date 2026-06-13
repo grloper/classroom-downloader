@@ -4,6 +4,7 @@ import { getOAuthClient } from '../auth/googleApi.js';
 import { config } from '../config.js';
 import { runPreflight } from './preflight.js';
 import { hasFlag } from '../utils/args.js';
+import { getSourcePath } from '../utils/runtimePaths.js';
 
 function runNodeScript(script, args = []) {
   return new Promise((resolve, reject) => {
@@ -48,7 +49,7 @@ async function main() {
   if (selectionVal) { crawlArgs.push('--selection'); crawlArgs.push(selectionVal); }
   if (downloadSelected) crawlArgs.push('--download-selected');
 
-  await runNodeScript('src/crawler/run.js', crawlArgs);
+  await runNodeScript(getSourcePath('crawler', 'run.js'), crawlArgs);
   console.log('\nArchive engine finished.');
   console.log(`Master index: ${path.join(config.paths.outputRoot, 'master_index.json')}`);
   console.log(`SQLite DB: ${config.paths.dbPath}`);
