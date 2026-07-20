@@ -1,11 +1,57 @@
 # Google Classroom Auto Archiver
 
 [![CI](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/ci.yml/badge.svg)](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/codeql.yml/badge.svg)](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/codeql.yml)
 
 Fully automatic, local-first Google Classroom archive engine for migration, backup, and content indexing.
 
 API-first Google Classroom archival engine with Playwright session fallback. It discovers accessible courses, crawls topics/coursework/materials/announcements, downloads Drive assets where permitted, writes SQLite metadata, and exports `output/master_index.json` for migration into another learning platform.
+
+---
+
+## ✨ Web App (no install, no terminal)
+
+There are now **two ways** to use this project:
+
+| | Web App (recommended for most people) | Local Engine (advanced / bulk) |
+| --- | --- | --- |
+| Install | **None** — runs in your browser | Node.js or a packaged executable |
+| Sign-in | One click (Google Identity Services) | Desktop OAuth client + JSON upload |
+| Best for | Browsing, backing up, and **sharing** | Large downloads, automation, scripting |
+| Output | Same `master_index.json` / `.zip` | Same `master_index.json` / SQLite |
+
+The web app lives in [`web/`](web/) and deploys to **GitHub Pages** with no build
+step. It cleanly separates the three concerns the project always had:
+
+- **Scraper Engine** (`web/src/scraper/`) — browser-side Google auth + Classroom/Drive REST.
+- **Export/Import Serializer** (`web/src/archive/`) — one-click `.zip`/`.json` and share links.
+- **UI Dashboard** (`web/src/ui/`) — a clean, searchable, filterable viewer.
+
+**Try it with zero setup:**
+
+```bash
+npm run web        # preview locally at http://127.0.0.1:8080
+```
+
+Then open the app and click **“View live demo”**, or drag in any archive `.zip`/`.json`.
+Anyone can open and browse a shared archive — no account, no install.
+
+- 📘 **[Web App Guide](docs/web-app-guide.md)** — viewing, archiving your own Classroom, and sharing.
+- 🧭 **[Strategy & Refactor Plan](docs/refactor-strategy.md)** — why and how the app is structured.
+
+> Reading your own Classroom still needs a free Google **OAuth Client ID** (a
+> Google policy for the Classroom/Drive APIs — it can’t be removed). The web app
+> reduces this to pasting one non-secret value; the [guide](docs/web-app-guide.md)
+> walks through it in ~2 minutes. Set it once in `web/config.js` and users get
+> one-click sign-in.
+
+### Deploying the web app
+
+1. Push to `main` (the [`Deploy Web App`](.github/workflows/pages.yml) workflow uploads `web/`).
+2. In **Settings → Pages**, set **Source: GitHub Actions**.
+3. Add your Pages origin (e.g. `https://<owner>.github.io`) to your OAuth client’s
+   **Authorized JavaScript origins**.
+
+---
 
 ## What It Does
 

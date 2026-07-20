@@ -1,6 +1,6 @@
 {
   "name": "google-classroom-auto-archiver",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Automatic Google Classroom crawler, Drive downloader, and migration archive exporter.",
   "type": "module",
   "private": true,
@@ -21,11 +21,14 @@
     "ui:dev": "node src/api/server.js",
     "build:standalone": "node scripts/build-standalone.js",
     "build:exe": "node scripts/build-standalone.js",
+    "web": "node scripts/serve-web.js",
+    "web:serve": "node scripts/serve-web.js",
     "test": "node --test",
     "sanitize:check": "node scripts/sanitize-check.js",
     "compliance:check": "node scripts/compliance-check.js",
     "release:check": "npm run check && npm test && npm run sanitize:check && npm run compliance:check && npm audit --audit-level=low",
-    "check": "node --check src/system/engine.js && node --check src/system/preflight.js && node --check src/crawler/run.js && node --check src/auth/login.js && node --check src/export/export.js && node --check src/api/server.js && node --check scripts/sanitize-check.js && node --check scripts/compliance-check.js"
+    "check": "node --check src/system/engine.js && node --check src/system/preflight.js && node --check src/crawler/run.js && node --check src/auth/login.js && node --check src/export/export.js && node --check src/api/server.js && node --check scripts/sanitize-check.js && node --check scripts/compliance-check.js && npm run check:web",
+    "check:web": "node scripts/check-web.js"
   },
   "dependencies": {
     "axios": "^1.7.9",
