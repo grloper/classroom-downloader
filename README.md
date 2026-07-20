@@ -1,332 +1,234 @@
-# Classroom Archiver
+<div align="center">
 
-[![CI](https://github.com/grloper/classroom-downloader/actions/workflows/ci.yml/badge.svg)](https://github.com/grloper/classroom-downloader/actions/workflows/ci.yml)
-[![Deploy Web App](https://github.com/grloper/classroom-downloader/actions/workflows/pages.yml/badge.svg)](https://github.com/grloper/classroom-downloader/actions/workflows/pages.yml)
+<img src="docs/assets/banner.png" alt="Classroom Archiver" width="840">
 
-Back up, browse, and share your Google Classroom content — as a **zero-install
-web app**, or as a **local-first CLI engine** for bulk downloads and automation.
-Both produce the same portable archive format, so a course crawled by one
-opens cleanly in the other.
+<h3>Back up, browse &amp; share your Google Classroom — beautifully, and 100% in your browser.</h3>
 
----
+<p>
+No install. No terminal. No data leaves your device.<br>
+Crawl a whole classroom, package it into a single file, and share it with a link anyone can open.
+</p>
 
-## Two ways to use it
+<p>
+<a href="https://grloper.github.io/classroom-downloader/"><img src="https://img.shields.io/badge/%E2%96%B6_Live_Demo-Open_the_app-4f46e5?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Demo"></a>
+&nbsp;
+<a href="docs/web-app-guide.md"><img src="https://img.shields.io/badge/%F0%9F%93%98_Read_the-Guide-1f2937?style=for-the-badge" alt="Guide"></a>
+</p>
 
-| | 🌐 Web App | 🖥️ Local Engine |
-| --- | --- | --- |
-| Install | **None** — runs in your browser | Node.js, or a packaged executable |
-| Sign-in | One click (Google Identity Services) | Desktop OAuth client + JSON upload |
-| Best for | Browsing, backing up, and **sharing** | Large downloads, automation, scripting |
-| Output | `master_index.json` graph, `.zip` export | Same `master_index.json` graph, SQLite |
-| Where | [`web/`](web/) → GitHub Pages | [`src/`](src/) → `npm run engine` or a release executable |
+<p>
+<a href="https://github.com/grloper/classroom-downloader/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/grloper/classroom-downloader/ci.yml?branch=main&style=flat-square&logo=githubactions&logoColor=white&label=CI" alt="CI"></a>
+<a href="https://github.com/grloper/classroom-downloader/actions/workflows/pages.yml"><img src="https://img.shields.io/github/actions/workflow/status/grloper/classroom-downloader/pages.yml?branch=main&style=flat-square&logo=github&label=deploy" alt="Deploy"></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/grloper/classroom-downloader?style=flat-square&color=4f46e5" alt="License"></a>
+<a href="https://github.com/grloper/classroom-downloader/stargazers"><img src="https://img.shields.io/github/stars/grloper/classroom-downloader?style=flat-square&logo=github&color=4f46e5" alt="Stars"></a>
+<img src="https://img.shields.io/badge/web_app-zero_dependencies-16a34a?style=flat-square" alt="Zero dependencies">
+<img src="https://img.shields.io/badge/data-100%25_local-16a34a?style=flat-square" alt="100% local">
 
-Both halves are read-only against Google — neither can post, edit, or delete
-anything in your Classroom or Drive.
+</p>
 
----
+<sub><a href="https://grloper.github.io/classroom-downloader/">Live&nbsp;Demo</a> · <a href="docs/web-app-guide.md">User&nbsp;Guide</a> · <a href="docs/refactor-strategy.md">Architecture</a> · <a href="https://github.com/grloper/classroom-downloader/issues/new">Report&nbsp;Bug</a> · <a href="https://github.com/grloper/classroom-downloader/issues/new">Request&nbsp;Feature</a></sub>
 
-## 🌐 Web App (recommended)
+</div>
 
-A static, no-build app: archive, browse, and share Classroom content entirely
-in your browser. Nothing is uploaded to any server.
+<br>
 
-- **Scraper Engine** (`web/src/scraper/`) — browser-side Google sign-in + Classroom/Drive REST.
-- **Export/Import Serializer** (`web/src/archive/`) — one-click `.zip`/`.json` export and share links.
-- **UI Dashboard** (`web/src/ui/`) — a clean, searchable, filterable, light/dark viewer.
+<div align="center">
 
-**Try it now — zero setup:**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/web-viewer-dark.png">
+  <img src="docs/assets/web-viewer-light.png" alt="The Classroom Archiver dashboard" width="880">
+</picture>
+
+<sub>The dashboard, in your browser — search, filter, and browse every course, assignment, and file. <i>(Adapts to your light/dark theme.)</i></sub>
+
+</div>
+
+<br>
+
+## ✨ Why Classroom Archiver?
+
+Google Classroom is where your coursework lives — until the term ends, access is revoked, or you graduate, and it's gone. Classroom Archiver makes your own **permanent, private, portable copy** in seconds, and lets you share it as easily as a link.
+
+- 🗂️ **Everything in one place** — courses, topics, assignments, quizzes, announcements, due dates, descriptions, and attachments, all organized and instantly searchable.
+- ⚡ **Zero setup for viewing** — open the site, drop in an archive, and browse. No account, no install, no build step.
+- 📦 **One-click export** — package a whole classroom (including downloaded Drive files) into a single `.zip`, or a tiny metadata `.json`.
+- 🔗 **Share with anyone** — send a link or the file; they open it in the same app with nothing to install.
+- 🔒 **Private by design** — everything runs locally in your browser. Read-only Google access; your data never touches a server we control.
+- 🖥️ **Power-user CLI too** — a local-first engine for bulk downloads and automation, producing the exact same archive format.
+
+## 🚀 Quick start
+
+**Just want to look around?** → **[Open the live demo](https://grloper.github.io/classroom-downloader/)** and click **"View live demo."** That's it.
+
+**Archive your own Classroom** (in the browser):
+
+1. Open the app → **Archive my Classroom**.
+2. Paste a free Google **OAuth Client ID** (one-time, ~2 min — the [guide](docs/web-app-guide.md) walks you through it) and **Sign in with Google** (read-only).
+3. Click **Start archiving** → then **Export** to save a `.zip`, or **Share** to get a link.
+
+**Run the app locally** (optional — no dependencies needed):
 
 ```bash
-npm run web        # preview locally at http://127.0.0.1:8080
+git clone https://github.com/grloper/classroom-downloader.git
+cd classroom-downloader
+npm run web        # → http://127.0.0.1:8080
 ```
 
-Open the app and click **"View live demo"**, or drag in any `.zip`/`.json` archive.
-Viewing and sharing need no account at all.
+> [!NOTE]
+> Reading your own Classroom requires a Google OAuth Client ID — that's a Google
+> policy for the Classroom/Drive APIs, not a limitation we can remove. It's free,
+> takes ~2 minutes, and the [Web App Guide](docs/web-app-guide.md) covers every step.
+> **Viewing and sharing archives needs none of this.**
 
-To **archive your own Classroom**, one free one-time step is unavoidable —
-Google requires an OAuth Client ID for the Classroom/Drive APIs. The web app
-reduces this to pasting one non-secret value (~2 minutes); see the guide below.
+## 🎬 See it in action
 
-- 📘 **[Web App Guide](docs/web-app-guide.md)** — viewing, archiving, and sharing.
-- 🧭 **[Strategy & Refactor Plan](docs/refactor-strategy.md)** — why and how the app is structured.
-- 📄 **[web/README.md](web/README.md)** — developer notes for the app itself.
+<div align="center">
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/web-viewer-light.png" alt="Dashboard (light)"><br><sub align="center"><b>Browse &amp; search</b> — courses, topics, assignments, files</sub></td>
+<td width="50%"><img src="docs/assets/web-viewer-dark.png" alt="Dashboard (dark)"><br><sub><b>Light &amp; dark</b> — easy on the eyes, day or night</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/web-landing.png" alt="Landing / import"><br><sub><b>Drop to open</b> — any <code>.zip</code>/<code>.json</code> archive, or a link</sub></td>
+<td width="50%"><img src="docs/assets/web-scrape.png" alt="Scrape wizard"><br><sub><b>Guided archiving</b> — three simple steps, all in-browser</sub></td>
+</tr>
+</table>
+</div>
 
-### Deploying the web app
+## 🧩 Two ways to use it
 
-1. Push to `main` (the [`Deploy Web App`](.github/workflows/pages.yml) workflow uploads `web/`).
-2. In **Settings → Pages**, set **Source: GitHub Actions**.
-3. Add your Pages origin (e.g. `https://<owner>.github.io`) to your OAuth
-   client's **Authorized JavaScript origins** for one-click sign-in.
+Both paths are read-only against Google and produce the **same portable archive** — a course crawled by one opens perfectly in the other.
 
----
+| | 🌐 **Web App** | 🖥️ **Local Engine** |
+|---|---|---|
+| **Install** | None — runs in your browser | Node.js, or a packaged executable |
+| **Sign-in** | One click (Google Identity Services) | Desktop OAuth client + JSON upload |
+| **Best for** | Browsing, backing up, and **sharing** | Large downloads, automation, scripting |
+| **Output** | `master_index.json` graph · `.zip` export | Same `master_index.json` graph · SQLite |
+| **Lives in** | [`web/`](web/) → GitHub Pages | [`src/`](src/) → `npm run engine` or a release binary |
 
-## 🖥️ Local Engine (advanced / bulk downloads)
+## 🔒 Privacy
 
-An API-first Google Classroom crawler with a Playwright session fallback. It
-discovers accessible courses, crawls topics/coursework/materials/announcements,
-downloads Drive assets where permitted, writes SQLite metadata, and exports
-`output/master_index.json` for migration into another platform.
+- **Local only.** Course data, tokens, and files are processed entirely in your browser (web app) or on your machine (CLI). There is no backend.
+- **Read-only.** The app requests read-only Classroom & Drive scopes — it can never post, edit, or delete anything in your account.
+- **Shares are safe.** An inline share link contains public metadata and original links only — never a file that lives solely on your disk.
+- **Ephemeral tokens.** The browser access token is short-lived, held in memory, and revoked on sign-out.
 
-**What it does:**
+## 🏗️ How it works
 
-- Crawls all Classroom courses visible to the authorized Google account.
-- Reads topics, coursework, materials, announcements, due dates, descriptions, and attachments.
-- Downloads accessible Google Drive files; exports Docs/Slides/Sheets/Drawings to portable formats.
-- Saves YouTube, Forms, and external links as structured references.
-- Stores metadata in SQLite and JSON; resumes interrupted runs and skips completed downloads.
-- Keeps credentials, tokens, logs, databases, browser sessions, and downloaded files local-only.
+Three cleanly separated layers — the same shape in the web app and the CLI:
 
-It also has its own local-only dashboard (`npm run ui`, bound to `127.0.0.1`)
-for browsing what's been downloaded and picking what to archive:
+```mermaid
+flowchart LR
+  A[🔑 Google sign-in] --> B[🕷️ Scraper Engine<br/>Classroom + Drive REST]
+  B --> C[🧱 Normalize<br/>courses · topics · materials · attachments]
+  C --> D[📦 Serializer<br/>.zip / .json / share link]
+  D --> E[🖥️ UI Dashboard<br/>browse · search · filter · preview]
+  D --> F[💾 Your files]
+```
 
-![Archive View](docs/assets/ui-archive.png)
-*The "Archive" view visualizes downloaded courses, topics, materials, and assignments.*
+| Layer | Web App | CLI Engine |
+|---|---|---|
+| **Scraper Engine** | [`web/src/scraper/`](web/src/scraper) — browser Google auth + REST | [`src/auth`](src/auth) · [`src/crawler`](src/crawler) · [`src/downloaders`](src/downloaders) |
+| **Serializer** | [`web/src/archive/`](web/src/archive) — `.zip`/`.json`/share | [`src/storage`](src/storage) — SQLite + `master_index.json` |
+| **UI Dashboard** | [`web/src/ui/`](web/src/ui) — searchable viewer | [`src/api`](src/api) — local `127.0.0.1` dashboard |
 
-![Download Plan](docs/assets/ui-dl-plan.png)
-*The "Download Plan" view lets you preview and select exactly what to archive.*
+> 📐 The full design rationale — and why the browser can do this at all — is in
+> **[docs/refactor-strategy.md](docs/refactor-strategy.md)**.
 
-![Telemetry and Stats](docs/assets/ui-telemetry.png)
-*An overview of the local database layout and archive telemetry.*
+<details>
+<summary><b>🖥️ Local Engine — advanced / bulk downloads</b></summary>
 
-![Configuration](docs/assets/ui-config.png)
-*Manage local settings and configuration, including database reset, from the dashboard.*
+<br>
 
-### Standalone executable (no coding required)
+An API-first crawler with a Playwright session fallback. It discovers accessible
+courses, crawls topics/coursework/materials/announcements, downloads Drive assets
+where permitted, writes SQLite metadata, and exports `output/master_index.json`.
 
-Windows, macOS, and Linux executables are published on every tagged release —
-no Node.js, Playwright, or Docker required.
+**Standalone executables** (no Node.js required) are published on every tagged
+release — download from [Releases](https://github.com/grloper/classroom-downloader/releases),
+drop the file in an empty folder, and run it. See the [CLI user guide](docs/user-guide.md).
 
-1. Go to the [GitHub Releases](https://github.com/grloper/classroom-downloader/releases) page.
-2. Download the executable for your OS (`classroom-downloader-win.exe`, `classroom-downloader-mac`, or `classroom-downloader-linux`).
-3. Place it in an empty folder — it creates its output/database folders next to itself.
-4. Run it. It opens the local dashboard in your browser.
-5. Follow the [user guide](docs/user-guide.md) to upload your Google OAuth Desktop app JSON, sign in, choose what to download, and start the archive.
+**From source:**
 
-Google requires every user or school to create their own OAuth Desktop app
-before first login; the dashboard walks you through uploading that JSON and
-keeps the token on your computer only.
+```bash
+npm install
+cp .env.example .env
+npm run ui        # dashboard + engine   (or: npm run engine)
+```
 
-### Quick start (for developers)
+First run performs preflight checks, opens Google OAuth in your browser, saves a
+token, crawls, downloads accessible Drive files, and writes SQLite + JSON. Later
+runs skip login and resume.
 
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-2. Copy `.env.example` to `.env` and adjust paths/settings.
-
-3. Do the one manual Google Cloud setup Google requires before first login:
-
-   - Open the Google Cloud project you'll use for this archive engine.
-   - Enable **Google Classroom API** and **Google Drive API**.
-   - Open **Google Auth Platform** → **OAuth consent screen**.
-   - Keep the app in **Testing** mode for personal/dev use.
-   - Under **Audience** → **Test users**, add every Google account you may sign in with.
-   - Create an OAuth client of type **Desktop app**.
-   - Download the client JSON to `credentials/oauth-client.json`.
-
-   Skipping the test-user step causes Google to show:
-
-   ```text
-   Access blocked: app has not completed the Google verification process
-   Error 403: access_denied
-   ```
-
-4. Run the dashboard UI, or just the background engine:
-
-   ```bash
-   npm run ui        # dashboard + engine
-   npm run engine    # engine only
-   ```
-
-   On first run, the engine performs preflight checks, opens Google OAuth in
-   your normal browser, saves the token, crawls Classroom, downloads
-   accessible Drive files, writes SQLite, and exports JSON. Later runs skip
-   login and resume the archive:
-
-   ```bash
-   npm run engine
-   ```
-
-### Commands
+<details>
+<summary>Commands &amp; flags</summary>
 
 ```bash
 npm run engine            # preflight, login if needed, crawl, download, export
-npm run backup             # same as engine
-npm run doctor              # check local credentials/token/database setup
-npm run login                # auth-only repair command
-npm run crawl                 # low-level crawl/download/export command
-npm run export                 # regenerate JSON from SQLite
-npm run api                     # local JSON API for the dashboard
-npm run build:standalone        # build a local portable executable for this OS
-npm run web                     # preview the web app locally (no deps)
-npm run check                   # syntax-check the engine + the web app
-npm test                        # unit tests (engine + web app)
-npm run sanitize:check          # verify public files contain no obvious private data
-npm run compliance:check        # validate local-only and release safety rules
-npm run release:check           # check, test, sanitize, compliance, audit
+npm run doctor            # check local credentials/token/database setup
+npm run login             # auth-only repair command
+npm run export            # regenerate JSON from SQLite
+npm run build:standalone  # build a portable executable for this OS
+npm run web               # preview the web app locally (no deps)
+npm test                  # unit tests (engine + web app)
+npm run release:check     # check, test, sanitize, compliance, audit
+
+npm run engine -- --no-download    # metadata only
+npm run engine -- --export-only    # rebuild JSON from SQLite
+npm run engine -- --plan-only      # crawl + write a download plan, no files
 ```
 
-Useful crawler flags:
+</details>
+
+The engine's own local-only dashboard (`npm run ui`, bound to `127.0.0.1`):
+
+<div align="center">
+<img src="docs/assets/ui-archive.png" alt="Local engine dashboard" width="720">
+</div>
+
+</details>
+
+## 🗺️ Roadmap
+
+- [ ] Selective scraping in the web app (pick courses/items before downloading)
+- [ ] Offline / PWA install of the viewer
+- [ ] Richer inline previews for Office document formats
+- [ ] Optional fully-offline `.zip` (viewer bundled inside the archive)
+
+See [docs/ui-roadmap.md](docs/ui-roadmap.md) for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! The web app has **no build step and no dependencies** —
+clone, run `npm run web`, and edit files in [`web/`](web/).
 
 ```bash
-npm run engine -- --no-download
-npm run engine -- --export-only
-npm run engine -- --api-only
-npm run engine -- --ui-only
+npm test            # unit tests (dependency-free for the web modules)
+npm run check       # syntax-check engine + web app
 ```
 
-### Output
+Found a bug or have an idea? [Open an issue](https://github.com/grloper/classroom-downloader/issues/new) or send a PR.
 
-```text
-output/
-  courses/
-    Math_Class/
-      Algebra/
-        Quadratics/
-          worksheet.pdf
-          lesson.docx
-          lesson.pdf
-          assignment.json
-  master_index.json
-database/
-  classroom.db
-logs/
-  archiver.log
-```
+## 🛠️ Built with
 
-### Security notes
+<p>
+<img src="https://img.shields.io/badge/JavaScript-ES_Modules-f7df1e?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript">
+<img src="https://img.shields.io/badge/No_framework-vanilla-000000?style=flat-square" alt="No framework">
+<img src="https://img.shields.io/badge/Node.js-20%2B-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js">
+<img src="https://img.shields.io/badge/SQLite-better--sqlite3-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+<img src="https://img.shields.io/badge/GitHub_Pages-deployed-222?style=flat-square&logo=github&logoColor=white" alt="GitHub Pages">
+</p>
 
-`GOOGLE_PASSWORD` is intentionally not used. Google accounts commonly require
-MFA, risk checks, and browser-bound trust state; scripting a password flow is
-brittle and unsafe. Run `npm run engine`, complete Google auth in the normal
-browser when prompted, and future runs use the local token file. Tokens and
-downloaded archives are ignored by git.
+## ⭐ Star history
 
-If you see "Couldn't sign you in. This browser or app may not be secure",
-close the Playwright browser and rerun `npm run engine` — do not use the
-Playwright browser for Google sign-in unless you specifically need UI
-fallback testing.
+If Classroom Archiver is useful to you, consider giving it a star — it genuinely helps.
 
-If you see `Error 403: access_denied` and Google says the app has not
-completed verification, add the signing-in Google account under **Google
-Auth Platform** → **Audience** → **Test users**, then rerun `npm run engine`.
+<a href="https://star-history.com/#grloper/classroom-downloader&Date">
+  <img src="https://api.star-history.com/svg?repos=grloper/classroom-downloader&type=Date" alt="Star History Chart" width="640">
+</a>
 
----
+## 📄 License
 
-## Data model
+Released under the [MIT License](LICENSE).
 
-Both the web app and the local engine share this shape — an archive from
-either one opens in either viewer.
-
-```mermaid
-erDiagram
-  COURSES ||--o{ TOPICS : has
-  COURSES ||--o{ MATERIALS : contains
-  TOPICS ||--o{ MATERIALS : groups
-  MATERIALS ||--o{ ATTACHMENTS : includes
-
-  COURSES {
-    text id PK
-    text name
-    text teacher
-    text url
-  }
-  TOPICS {
-    text id PK
-    text course_id FK
-    text title
-  }
-  MATERIALS {
-    text id PK
-    text course_id FK
-    text topic_id FK
-    text title
-    text type
-    text due_date
-  }
-  ATTACHMENTS {
-    text id PK
-    text material_id FK
-    text filename
-    text mime_type
-    text local_path
-    text status
-  }
-```
-
-### Local engine crawl flow
-
-```mermaid
-flowchart TD
-  A[npm run engine] --> B[Preflight]
-  B --> C{OAuth token exists?}
-  C -- no --> D[Open Google OAuth in system browser]
-  C -- yes --> E[Classroom API crawl]
-  D --> E
-  E --> F[Normalize courses, topics, materials, attachments]
-  F --> G[SQLite metadata store]
-  G --> H[Drive download/export manager]
-  H --> I[Local files under output/courses]
-  G --> J[master_index.json]
-  I --> K[Migration-ready archive]
-  J --> K
-```
-
-### Classroom/Drive API coverage
-
-- `courses.list`, `courses.teachers.list`, `courses.topics.list`
-- `courses.courseWork.list`, `courses.courseWorkMaterials.list`, `courses.announcements.list`
-- `drive.files.get`, `drive.files.export`
-
-References: [coursework](https://developers.google.com/workspace/classroom/reference/rest/v1/courses.courseWork/list) ·
-[materials](https://developers.google.com/workspace/classroom/reference/rest/v1/courses.courseWorkMaterials/list) ·
-[topics](https://developers.google.com/workspace/classroom/reference/rest/v1/courses.topics/list) ·
-[Drive export](https://developers.google.com/drive/api/v3/reference/files/export)
-
----
-
-## Public repo safety
-
-The repository is designed to be public-safe. The following are ignored by git:
-
-- `.env`
-- `credentials/*.json`
-- `sessions/**`
-- `database/*.db`, `database/*.db-*`
-- `logs/**`
-- `output/master_index.json`, `output/courses/**`
-
-Before publishing, run:
-
-```bash
-npm run release:check
-```
-
-## CI/CD
-
-- **Validation** (`ci.yml`) — syntax check, unit tests, sanitize/compliance
-  checks, and a dependency audit on Node.js 20 and 22, for every push/PR to
-  `main`, `develop`, and `staging`.
-- **Deploy Web App** (`pages.yml`) — publishes `web/` to GitHub Pages on every
-  push to `main` that touches it (or on demand).
-- **Release** (`release.yml`) — on a `vX.Y.Z` tag, builds Windows/macOS/Linux
-  standalone executables and publishes a GitHub Release.
-- Weekly Dependabot checks for npm and GitHub Actions dependencies.
-
-See [docs/environments.md](docs/environments.md) for branch, staging,
-production, and compliance gates.
-
-## Roadmap
-
-- Selective scraping in the web app (choose courses/items before downloading),
-  matching the local engine's `--plan-only` / `--select` flow — see
-  [docs/ui-roadmap.md](docs/ui-roadmap.md) and
-  [docs/prompts/selective-download-ui.prompt.json](docs/prompts/selective-download-ui.prompt.json).
-- Offline/PWA install of the web viewer.
-- Richer inline previews for Office document formats.
-
-## License
-
-See [LICENSE](LICENSE).
+<div align="center"><sub>Made for students, teachers, and schools. Your classroom, yours to keep.</sub></div>
