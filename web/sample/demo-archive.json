@@ -1,0 +1,203 @@
+{
+  "format": "classroom-archive",
+  "version": 1,
+  "meta": {
+    "app": "Classroom Archiver",
+    "appVersion": "2.0.0",
+    "generatedAt": "2026-06-14T10:00:00.000Z",
+    "source": "demo",
+    "account": "Demo account",
+    "title": "Demo — 2 courses",
+    "shared": true
+  },
+  "graph": {
+    "generated_at": "2026-06-14T10:00:00.000Z",
+    "courses": [
+      {
+        "id": "c-bio-101",
+        "name": "Biology 101",
+        "teacher": "Dr. Amara Okafor",
+        "url": "https://classroom.google.com/c/demo-bio",
+        "created_at": "2025-09-01T08:00:00.000Z",
+        "section": "Period 2",
+        "description": "Introduction to cellular biology, genetics, and ecosystems. This is demo data — every item opens its original link.",
+        "room": "S-14",
+        "topics": [
+          {
+            "id": "t-cells",
+            "title": "Unit 1 — The Cell",
+            "materials": [
+              {
+                "id": "m-cell-intro",
+                "title": "Reading: Cell structure & organelles",
+                "description": "Read chapter 3 (pp. 40–58) before Thursday. Focus on the differences between prokaryotic and eukaryotic cells.",
+                "type": "material",
+                "due_date": null,
+                "source_url": "https://classroom.google.com/c/demo-bio/m/1",
+                "local_path": null,
+                "attachments": [
+                  {
+                    "id": "a-cell-slides",
+                    "filename": "Cell Structure (Slides).pdf",
+                    "local_path": null,
+                    "mime_type": "application/pdf",
+                    "provider": "drive",
+                    "file_id": "demo1",
+                    "source_url": "https://docs.google.com/presentation/d/demo-cells",
+                    "status": "reference",
+                    "bytes": 2400000
+                  },
+                  {
+                    "id": "a-cell-video",
+                    "filename": "Inside the Cell (video)",
+                    "local_path": null,
+                    "mime_type": "application/vnd.youtube.video",
+                    "provider": "youtube",
+                    "source_url": "https://www.youtube.com/watch?v=URUJD5NEXC8",
+                    "status": "reference"
+                  }
+                ]
+              },
+              {
+                "id": "m-cell-lab",
+                "title": "Lab 1: Observing onion cells",
+                "description": "Complete the microscope lab worksheet and submit your labelled diagram.",
+                "type": "assignment",
+                "due_date": "2026-06-20",
+                "source_url": "https://classroom.google.com/c/demo-bio/a/1",
+                "local_path": null,
+                "attachments": [
+                  {
+                    "id": "a-lab-doc",
+                    "filename": "Onion Cell Lab Worksheet.pdf",
+                    "local_path": null,
+                    "mime_type": "application/pdf",
+                    "provider": "drive",
+                    "file_id": "demo2",
+                    "source_url": "https://docs.google.com/document/d/demo-lab",
+                    "status": "reference",
+                    "bytes": 180000
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "t-genetics",
+            "title": "Unit 2 — Genetics",
+            "materials": [
+              {
+                "id": "m-quiz-1",
+                "title": "Quiz: Mendelian inheritance",
+                "description": "Short quiz on dominant/recessive traits and Punnett squares.",
+                "type": "quiz",
+                "due_date": "2026-06-25T23:59:00",
+                "source_url": "https://classroom.google.com/c/demo-bio/a/2",
+                "local_path": null,
+                "attachments": [
+                  {
+                    "id": "a-quiz-form",
+                    "filename": "Genetics Quiz",
+                    "local_path": null,
+                    "mime_type": "application/vnd.google-apps.form",
+                    "provider": "form",
+                    "source_url": "https://docs.google.com/forms/d/demo-quiz/viewform",
+                    "status": "reference"
+                  }
+                ]
+              },
+              {
+                "id": "an-1",
+                "title": "Reminder: bring your lab notebooks",
+                "description": "We'll start the genetics lab on Monday. Please bring your lab notebook and a pencil.",
+                "type": "announcement",
+                "due_date": null,
+                "source_url": "https://classroom.google.com/c/demo-bio/p/1",
+                "local_path": null,
+                "attachments": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "c-cs-201",
+        "name": "Intro to Computer Science",
+        "teacher": "Mr. Diego Santos",
+        "url": "https://classroom.google.com/c/demo-cs",
+        "created_at": "2025-09-01T08:00:00.000Z",
+        "section": "Period 5",
+        "description": "Problem solving with Python: variables, loops, functions, and a capstone project.",
+        "room": "T-3",
+        "topics": [
+          {
+            "id": "t-basics",
+            "title": "Getting Started",
+            "materials": [
+              {
+                "id": "m-setup",
+                "title": "Course syllabus & setup guide",
+                "description": "How the course works, grading, and how to install Python at home.",
+                "type": "material",
+                "due_date": null,
+                "source_url": "https://classroom.google.com/c/demo-cs/m/1",
+                "local_path": null,
+                "attachments": [
+                  {
+                    "id": "a-syllabus",
+                    "filename": "CS201 Syllabus.pdf",
+                    "local_path": null,
+                    "mime_type": "application/pdf",
+                    "provider": "drive",
+                    "file_id": "demo3",
+                    "source_url": "https://docs.google.com/document/d/demo-syllabus",
+                    "status": "reference",
+                    "bytes": 96000
+                  },
+                  {
+                    "id": "a-python-link",
+                    "filename": "python.org/downloads",
+                    "local_path": null,
+                    "mime_type": "text/uri-list",
+                    "provider": "link",
+                    "source_url": "https://www.python.org/downloads/",
+                    "download_url": "https://www.python.org/downloads/",
+                    "status": "reference"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "t-project",
+            "title": "Capstone Project",
+            "materials": [
+              {
+                "id": "m-project",
+                "title": "Final project: build a small game",
+                "description": "Design and build a text-based game in Python. Submit your .py file and a short write-up.",
+                "type": "assignment",
+                "due_date": "2026-07-10",
+                "source_url": "https://classroom.google.com/c/demo-cs/a/1",
+                "local_path": null,
+                "attachments": [
+                  {
+                    "id": "a-rubric",
+                    "filename": "Project Rubric.pdf",
+                    "local_path": null,
+                    "mime_type": "application/pdf",
+                    "provider": "drive",
+                    "file_id": "demo4",
+                    "source_url": "https://docs.google.com/document/d/demo-rubric",
+                    "status": "reference",
+                    "bytes": 120000
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
