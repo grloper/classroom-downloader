@@ -25,7 +25,9 @@ Crawl a whole classroom, package it into a single file, and share it with a link
 
 </p>
 
-<sub><a href="https://grloper.github.io/classroom-downloader/">Live&nbsp;Demo</a> · <a href="docs/web-app-guide.md">User&nbsp;Guide</a> · <a href="docs/refactor-strategy.md">Architecture</a> · <a href="https://github.com/grloper/classroom-downloader/issues/new">Report&nbsp;Bug</a> · <a href="https://github.com/grloper/classroom-downloader/issues/new">Request&nbsp;Feature</a></sub>
+<p><sub>Created &amp; maintained by <a href="https://github.com/grloper"><b>@grloper</b></a></sub></p>
+
+<sub><a href="https://grloper.github.io/classroom-downloader/">Live&nbsp;Demo</a> · <a href="docs/web-app-guide.md">User&nbsp;Guide</a> · <a href="docs/refactor-strategy.md">Architecture</a> · <a href="https://github.com/grloper/classroom-downloader/issues/new">Report&nbsp;Bug</a> · <a href="https://github.com/grloper/classroom-downloader/issues/new">Request&nbsp;Feature</a> · <a href="https://github.com/grloper">@grloper</a></sub>
 
 </div>
 
@@ -227,8 +229,16 @@ If Classroom Archiver is useful to you, consider giving it a star — it genuine
   <img src="https://api.star-history.com/svg?repos=grloper/classroom-downloader&type=Date" alt="Star History Chart" width="640">
 </a>
 
+## 👤 Author
+
+Built and maintained by **[@grloper](https://github.com/grloper)**.
+
+<a href="https://github.com/grloper"><img src="https://img.shields.io/github/followers/grloper?label=Follow%20%40grloper&style=social" alt="Follow @grloper on GitHub"></a>
+
+Questions, ideas, or want to contribute? [Open an issue](https://github.com/grloper/classroom-downloader/issues/new) or reach me on GitHub at **[github.com/grloper](https://github.com/grloper)**.
+
 ## 📄 License
 
-Released under the [MIT License](LICENSE).
+Released under the [MIT License](LICENSE) © [@grloper](https://github.com/grloper).
 
-<div align="center"><sub>Made for students, teachers, and schools. Your classroom, yours to keep.</sub></div>
+<div align="center"><sub>Made for students, teachers, and schools by <a href="https://github.com/grloper">@grloper</a>. Your classroom, yours to keep.</sub></div>
