@@ -1,7 +1,6 @@
 # Google Classroom Auto Archiver
 
 [![CI](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/ci.yml/badge.svg)](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/codeql.yml/badge.svg)](https://github.com/grloper/google-classroom-auto-archiver/actions/workflows/codeql.yml)
 
 Fully automatic, local-first Google Classroom archive engine for migration, backup, and content indexing.
 
