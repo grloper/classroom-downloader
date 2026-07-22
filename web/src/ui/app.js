@@ -89,7 +89,7 @@ async function route() {
       return loadInto(() => importFromUrl(params.get('src')), 'Loading archive…');
     }
     if (state.loaded) return show(renderViewer(state.loaded));
-    return navigate('#/'); // nothing loaded → home
+    return loadInto(() => importFromUrl(new URL('sample/demo-archive.json', document.baseURI).toString()), 'Opening viewer…');
   }
 
   // Landing
