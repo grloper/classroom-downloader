@@ -91,10 +91,11 @@ export function renderViewer(loaded) {
         title: 'Toggle expand all sidebar topics',
         onClick: (e) => {
           e.stopPropagation();
-          if (expandedSidebarCourses.size === graph.courses.length) {
+          const coursesList = graph?.courses || [];
+          if (expandedSidebarCourses.size === coursesList.length) {
             expandedSidebarCourses.clear();
           } else {
-            graph.courses.forEach((c) => expandedSidebarCourses.add(c.id));
+            coursesList.forEach((c) => expandedSidebarCourses.add(c.id));
           }
           renderSidebar();
         }
@@ -104,9 +105,10 @@ export function renderViewer(loaded) {
     const items = [titleRow];
     items.push(courseItem({ id: null, name: 'All courses', count: counts.materials }, selectedCourseId === null, 'home'));
 
-    for (const c of graph.courses) {
+    for (const c of graph?.courses || []) {
       let items2 = 0;
-      for (const t of c.topics) items2 += t.materials.length;
+      const topicsList = c.topics || [];
+      for (const t of topicsList) items2 += (t.materials || []).length;
 
       const isExpanded = expandedSidebarCourses.has(c.id);
       const isActive = selectedCourseId === c.id && !selectedTopicId;
@@ -132,16 +134,16 @@ export function renderViewer(loaded) {
           sidebar.parentElement?.querySelector('.main')?.scrollTo?.({ top: 0 });
         }
       }, [
-        c.topics.length ? toggleBtn : el('span', { style: { width: '13px' } }),
+        topicsList.length ? toggleBtn : el('span', { style: { width: '13px' } }),
         icon('book', { size: 16 }),
-        el('span', { class: 'ci-name' }, c.name),
+        el('span', { class: 'ci-name' }, c.name || 'Untitled course'),
         el('span', { class: 'ci-count' }, String(items2))
       ]);
 
       items.push(cItem);
 
-      if (isExpanded && c.topics.length) {
-        const topicNodes = c.topics.map((t) => {
+      if (isExpanded && topicsList.length) {
+        const topicNodes = topicsList.map((t) => {
           const isTopicActive = selectedCourseId === c.id && selectedTopicId === t.id;
           return el('div', {
             class: `sidebar-topic-item${isTopicActive ? ' active' : ''}`,
@@ -158,8 +160,8 @@ export function renderViewer(loaded) {
             }
           }, [
             icon('folder', { size: 13 }),
-            el('span', { class: 'sti-title' }, t.title),
-            el('span', { class: 'sti-count' }, String(t.materials.length))
+            el('span', { class: 'sti-title' }, t.title || 'Untitled topic'),
+            el('span', { class: 'sti-count' }, String((t.materials || []).length))
           ]);
         });
         items.push(el('div', { class: 'sidebar-topics' }, topicNodes));
@@ -173,15 +175,15 @@ export function renderViewer(loaded) {
     const filtered = applyFilters(graph, filters);
 
     if (selectedTopicId) {
-      filtered.courses.forEach((c) => {
-        c.topics = c.topics.filter((t) => t.id === selectedTopicId);
+      (filtered.courses || []).forEach((c) => {
+        c.topics = (c.topics || []).filter((t) => t.id === selectedTopicId);
       });
-      filtered.courses = filtered.courses.filter((c) => c.topics.length);
+      filtered.courses = (filtered.courses || []).filter((c) => (c.topics || []).length);
     }
 
     const counts = countGraph(filtered);
 
-    if (!filtered.courses.length) {
+    if (!(filtered.courses || []).length) {
       mount(content, emptyState('No matching items', 'Try clearing the search or filters.'));
       return;
     }
@@ -190,7 +192,7 @@ export function renderViewer(loaded) {
     if (selectedCourseId === null && !selectedTopicId) {
       nodes.push(statRow(counts, loaded.hasFiles));
     }
-    for (const course of filtered.courses) {
+    for (const course of filtered.courses || []) {
       nodes.push(renderCourse(course));
     }
     mount(content, nodes);
@@ -198,7 +200,7 @@ export function renderViewer(loaded) {
 
   function renderCourse(course) {
     const children = [courseHero(course)];
-    const visibleTopics = course.topics.filter((t) => t.materials.length);
+    const visibleTopics = (course.topics || []).filter((t) => (t.materials || []).length);
     if (!visibleTopics.length) {
       children.push(emptyState('Nothing here yet', 'No items match the current filters in this course.'));
     }
@@ -210,6 +212,7 @@ export function renderViewer(loaded) {
 
   function renderTopic(topic) {
     const isCollapsed = collapsedTopics.has(topic.id);
+    const matsList = topic.materials || [];
     const head = el('div', {
       class: 'topic-head',
       style: { cursor: 'pointer', userSelect: 'none' },
@@ -221,12 +224,12 @@ export function renderViewer(loaded) {
     }, [
       icon(isCollapsed ? 'chevron' : 'chevron-down', { size: 14 }),
       icon('folder', { size: 15 }),
-      topic.title,
+      topic.title || 'Untitled topic',
       el('span', { class: 'th-line' }),
-      el('span', { class: 'small muted' }, `${topic.materials.length} items`)
+      el('span', { class: 'small muted' }, `${matsList.length} items`)
     ]);
 
-    const mats = isCollapsed ? null : topic.materials.map(renderMaterial);
+    const mats = isCollapsed ? null : matsList.map(renderMaterial);
 
     return el('div', { class: 'topic', id: `topic-${topic.id}` }, [
       head,
@@ -253,12 +256,13 @@ export function renderViewer(loaded) {
     }
 
     const body = [
-      el('div', { class: 'material-title' }, mat.title),
+      el('div', { class: 'material-title' }, mat.title || 'Untitled'),
       el('div', { class: 'material-meta' }, meta)
     ];
     if (mat.description) body.push(el('div', { class: 'material-desc' }, mat.description));
-    if (mat.attachments.length) {
-      body.push(el('div', { class: 'attach-list' }, mat.attachments.map(renderAttachment)));
+    const attList = mat.attachments || [];
+    if (attList.length) {
+      body.push(el('div', { class: 'attach-list' }, attList.map(renderAttachment)));
     }
 
     return el('div', { class: 'material' }, [
