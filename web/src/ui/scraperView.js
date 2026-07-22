@@ -5,6 +5,8 @@ import { GoogleSession, parseClassroomUrl } from '../scraper/googleAuth.js';
 import { scrapeClassroom } from '../scraper/scrapeEngine.js';
 import { buildGraph, makeArchive } from '../archive/format.js';
 import { LoadedArchive } from '../archive/importer.js';
+import { createCoursePicker } from './coursePicker.js';
+import { listCourses } from '../scraper/classroomApi.js';
 
 const CLIENT_ID_KEY = 'ca-client-id';
 
@@ -24,7 +26,14 @@ export function renderScraper(handlers) {
   const signInBtn = el('button', { class: 'btn primary', onClick: doSignIn }, [icon('google', { size: 17 }), 'Sign in with Google']);
   const clientIdField = clientIdInput(session);
 
-  const urlField = el('input', { type: 'url', placeholder: 'https://classroom.google.com/c/…  (optional — leave blank for all courses)' });
+  const picker = createCoursePicker();
+  const urlField = el('input', { type: 'url', placeholder: 'https://classroom.google.com/c/…' });
+  const urlContent = el('div', { class: 'url-fallback-content' }, urlField);
+  const urlToggle = el('div', { 
+    class: 'url-fallback-toggle', 
+    onClick: () => urlContent.classList.toggle('visible')
+  }, 'Or paste a Classroom URL instead');
+
   const driveCheck = el('input', { type: 'checkbox', checked: true });
   const runBtn = el('button', { class: 'btn success block', disabled: true, onClick: doRun }, [icon('download', { size: 17 }), 'Start archiving']);
 
@@ -37,9 +46,14 @@ export function renderScraper(handlers) {
     el('div', { style: { display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' } }, [signInBtn, accountLine])
   ].filter(Boolean));
 
-  const step2 = step(2, 'Choose what to archive', 'Archive everything, or paste one Classroom link to limit it to a single course.', [
-    el('div', { class: 'field' }, [el('label', {}, 'Classroom URL (optional)'), urlField]),
-    el('label', { class: 'check' }, [driveCheck, 'Download attached Drive files (Docs, PDFs, images…) into the archive'])
+  const step2 = step(2, 'Choose what to archive', 'Select specific courses or archive everything at once.', [
+    el('div', { class: 'field' }, [
+      el('label', {}, 'Courses'),
+      picker.root,
+      urlToggle,
+      urlContent
+    ]),
+    el('label', { class: 'check', style: { marginTop: '16px' } }, [driveCheck, 'Download attached Drive files (Docs, PDFs, images…) into the archive'])
   ]);
 
   const step3 = step(3, 'Create the archive', 'This reads your courses and packages them. Larger classes with many files take longer.', [
@@ -81,6 +95,11 @@ export function renderScraper(handlers) {
       signInBtn.classList.add('success');
       accountLine.textContent = session.account ? `Connected as ${session.account}` : 'Connected';
       updateStepStates();
+      picker.setLoading(true);
+      try {
+        const courseList = await listCourses(session, config.courseStates);
+        picker.setCourses(courseList);
+      } catch (err) { picker.setCourses([]); }
     } catch (err) {
       signInBtn.disabled = false;
       mount(signInBtn, [icon('google', { size: 17 }), 'Sign in with Google']);
@@ -107,7 +126,9 @@ export function renderScraper(handlers) {
       result = await scrapeClassroom({
         session,
         config,
-        courseFilterId: parseClassroomUrl(urlField.value),
+        courseFilterIds: picker.getSelectedIds().length > 0 
+          ? picker.getSelectedIds() 
+          : (parseClassroomUrl(urlField.value) ? [parseClassroomUrl(urlField.value)] : null),
         includeDrive: driveCheck.checked,
         onProgress: (p) => {
           if (p.phase === 'warn') log(`⚠ ${p.message}`, 'l-warn');

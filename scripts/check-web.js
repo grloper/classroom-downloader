@@ -6,7 +6,9 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
-const root = new URL('../web', import.meta.url).pathname;
+import { fileURLToPath } from 'node:url';
+
+const root = fileURLToPath(new URL('../web', import.meta.url));
 
 function collect(dir) {
   const out = [];

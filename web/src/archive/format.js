@@ -14,7 +14,7 @@
  * (see src/storage/database.js#getCoursesGraph), so files from either tool load
  * in the same viewer with no conversion.
  */
-import { encodeBase64Url, decodeBase64Url } from '../util/base64.js';
+import { encodeBase64Url, decodeBase64Url, compressString, decompressString, bytesToBase64Url, base64UrlToBytes } from '../util/base64.js';
 
 export const ARCHIVE_FORMAT = 'classroom-archive';
 export const ARCHIVE_VERSION = 1;
@@ -234,13 +234,25 @@ export function flattenAttachments(graph) {
 
 // ---- Share-link codec (small metadata-only archives embedded in a URL) ----
 
-export function encodeSharePayload(archive) {
+export async function encodeSharePayload(archive) {
   const slim = makeShareable(archive);
-  return encodeBase64Url(JSON.stringify(slim));
+  try {
+    const compressed = await compressString(JSON.stringify(slim));
+    return 'z:' + bytesToBase64Url(compressed);
+  } catch {
+    return encodeBase64Url(JSON.stringify(slim));
+  }
 }
 
-export function decodeSharePayload(encoded) {
-  const obj = JSON.parse(decodeBase64Url(encoded));
+export async function decodeSharePayload(encoded) {
+  let jsonStr;
+  if (encoded.startsWith('z:')) {
+    const compressed = base64UrlToBytes(encoded.slice(2));
+    jsonStr = await decompressString(compressed);
+  } else {
+    jsonStr = decodeBase64Url(encoded);
+  }
+  const obj = JSON.parse(jsonStr);
   return normalizeArchive(obj, { source: 'share-link' });
 }
 
@@ -252,10 +264,14 @@ export function decodeSharePayload(encoded) {
 export function makeShareable(archive) {
   const graph = sanitizeGraph(archive.graph);
   for (const c of graph.courses) {
+    delete c.raw;
     for (const t of c.topics) {
+      delete t.raw;
       for (const m of t.materials) {
+        delete m.raw;
         m.local_path = null;
         for (const a of m.attachments) {
+          delete a.raw;
           a.local_path = null;
           a.status = a.status === 'complete' ? 'reference' : a.status;
           a.downloaded_files = [];

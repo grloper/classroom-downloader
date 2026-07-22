@@ -41,7 +41,7 @@ export const config = {
   courseStates: ['ACTIVE', 'ARCHIVED'],
 
   /** A shareable archive embedded directly in a link must stay under this size. */
-  maxInlineShareBytes: 1_500_000
+  maxInlineShareBytes: 32_000
 };
 
 export default config;

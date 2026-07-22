@@ -34,7 +34,7 @@ const noop = () => {};
 export async function scrapeClassroom({
   session,
   config = defaultConfig,
-  courseFilterId = null,
+  courseFilterIds = null,
   includeDrive = true,
   onProgress = noop,
   signal
@@ -43,10 +43,11 @@ export async function scrapeClassroom({
   onProgress({ phase: 'discover', message: 'Finding your courses…' });
 
   let courses = await listCourses(session, config.courseStates, { signal });
-  if (courseFilterId) {
-    const filtered = courses.filter((c) => c.id === courseFilterId);
+  if (courseFilterIds && courseFilterIds.length > 0) {
+    const filterSet = new Set(courseFilterIds);
+    const filtered = courses.filter((c) => filterSet.has(c.id));
     if (filtered.length) courses = filtered;
-    else warn(`Course ${courseFilterId} not found in your account — archiving all courses instead.`);
+    else warn(`Selected courses not found in your account — archiving all courses instead.`);
   }
 
   const entities = { courses: [], topics: [], materials: [], attachments: [] };
@@ -95,6 +96,7 @@ export async function scrapeClassroom({
   const files = new Map();
   if (includeDrive) {
     await downloadDriveFiles({ session, entities, files, onProgress, signal });
+    await downloadNonDriveAttachments({ entities, files, onProgress, signal });
   }
 
   return { entities, files };
@@ -163,4 +165,107 @@ async function downloadDriveFiles({ session, entities, files, onProgress, signal
     current: total,
     total
   });
+}
+
+async function downloadNonDriveAttachments({ entities, files, onProgress, signal }) {
+  const attachments = entities.attachments.filter((a) => a.provider !== 'drive');
+  const total = attachments.length;
+  if (!total) return;
+
+  const usedPaths = new Set();
+  let done = 0;
+  let failed = 0;
+  const concurrency = 4;
+
+  onProgress({ phase: 'download', message: `Downloading ${total} non-Drive attachments…`, current: 0, total });
+
+  const queue = [...attachments];
+  async function worker() {
+    while (queue.length) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      const attachment = queue.shift();
+      try {
+        let blob, mimeType, ext;
+        
+        if (attachment.provider === 'link') {
+          try {
+            const res = await fetch(attachment.url, { signal });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            blob = await res.blob();
+            mimeType = blob.type.split(';')[0];
+            ext = guessExtFromMime(mimeType) || 'html';
+          } catch (err) {
+            // Fall back to .url shortcut
+            const shortcut = saveUrlShortcut(attachment.url);
+            blob = shortcut.blob;
+            mimeType = shortcut.mimeType;
+            ext = 'url';
+          }
+        } else if (attachment.provider === 'youtube' || attachment.provider === 'form') {
+          const shortcut = saveUrlShortcut(attachment.url);
+          blob = shortcut.blob;
+          mimeType = shortcut.mimeType;
+          ext = 'url';
+        } else {
+          // Fallback for unknown provider
+          const shortcut = saveUrlShortcut(attachment.url || '');
+          blob = shortcut.blob;
+          mimeType = shortcut.mimeType;
+          ext = 'url';
+        }
+
+        const baseName = safeSegment(attachment.title || attachment.id || attachment.provider);
+        const filename = `${baseName}.${ext}`;
+        const dir = materialDir(entities, attachment);
+        const relPath = uniquePath(joinPath(dir, filename), usedPaths);
+        
+        files.set(relPath, { blob, mimeType });
+        Object.assign(attachment, {
+          filename,
+          mime_type: mimeType,
+          local_path: relPath,
+          bytes: blob.size,
+          status: 'complete',
+          downloaded_files: [
+            { label: 'primary', filename, mime_type: mimeType, local_path: relPath, bytes: blob.size }
+          ]
+        });
+      } catch (err) {
+        failed += 1;
+        Object.assign(attachment, { status: 'failed', skipped_reason: err.message });
+        onProgress({ phase: 'warn', message: `Could not process ${attachment.title || attachment.url}: ${err.message}` });
+      } finally {
+        done += 1;
+        onProgress({ phase: 'download', message: `Downloaded ${done}/${total} non-Drive items`, current: done, total });
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, total) }, worker));
+  onProgress({
+    phase: 'downloaded',
+    message: `Downloaded ${total - failed}/${total} non-Drive items${failed ? ` (${failed} unavailable)` : ''}.`,
+    current: total,
+    total
+  });
+}
+
+function saveUrlShortcut(url) {
+  return {
+    blob: new Blob([`[InternetShortcut]\nURL=${url}\n`], { type: 'text/plain' }),
+    mimeType: 'text/plain'
+  };
+}
+
+function guessExtFromMime(mime) {
+  const m = mime.toLowerCase();
+  if (m.includes('html')) return 'html';
+  if (m.includes('pdf')) return 'pdf';
+  if (m.includes('jpeg') || m.includes('jpg')) return 'jpg';
+  if (m.includes('png')) return 'png';
+  if (m.includes('gif')) return 'gif';
+  if (m.includes('svg')) return 'svg';
+  if (m.includes('json')) return 'json';
+  if (m.includes('text/plain')) return 'txt';
+  return null;
 }

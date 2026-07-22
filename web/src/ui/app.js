@@ -83,7 +83,7 @@ async function route() {
 
   if (path === '/view') {
     if (params.get('data')) {
-      return loadInto(() => Promise.resolve(importFromShareData(params.get('data'))), 'Opening shared archive…');
+      return loadInto(() => importFromShareData(params.get('data')), 'Opening shared archive…');
     }
     if (params.get('src')) {
       return loadInto(() => importFromUrl(params.get('src')), 'Loading archive…');
@@ -183,10 +183,16 @@ function openExportMenu() {
   ]);
 }
 
-function openShare() {
+async function openShare() {
   const overlay = modalShell('Share archive');
   const body = overlay._body;
-  const inline = buildInlineShareLink(state.loaded.archive);
+  mount(body, [
+    el('div', { class: 'empty', style: { padding: '20px 0' } }, [
+      icon('spinner', { size: 30, class: 'spin' }),
+      el('div', { style: { marginTop: '10px' } }, 'Generating link…')
+    ])
+  ]);
+  const inline = await buildInlineShareLink(state.loaded.archive);
   const children = [];
 
   if (inline.ok) {

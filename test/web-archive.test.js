@@ -103,7 +103,7 @@ test('normalizeArchive rejects junk', () => {
   assert.throws(() => normalizeArchive({ hello: 'world' }));
 });
 
-test('share link round-trips and strips local files', () => {
+test('share link round-trips and strips local files', async () => {
   const graph = buildGraph(sampleEntities());
   // Simulate a downloaded file on one attachment.
   graph.courses[0].topics[0].materials[0].attachments[0].local_path = 'courses/Math/Algebra/HW/sheet.pdf';
@@ -113,8 +113,8 @@ test('share link round-trips and strips local files', () => {
   const shareable = makeShareable(archive);
   assert.equal(shareable.graph.courses[0].topics[0].materials[0].attachments[0].local_path, null);
 
-  const encoded = encodeSharePayload(archive);
-  const decoded = decodeSharePayload(encoded);
+  const encoded = await encodeSharePayload(archive);
+  const decoded = await decodeSharePayload(encoded);
   assert.equal(decoded.graph.courses[0].name, 'Math');
   assert.equal(decoded.meta.shared, true);
   assert.equal(decoded.graph.courses[0].topics[0].materials[0].attachments[0].local_path, null);

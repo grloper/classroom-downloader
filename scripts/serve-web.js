@@ -6,7 +6,9 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import { join, normalize, extname } from 'node:path';
 import process from 'node:process';
 
-const webRoot = new URL('../web', import.meta.url).pathname;
+import { fileURLToPath } from 'node:url';
+
+const webRoot = fileURLToPath(new URL('../web', import.meta.url));
 const port = Number(process.env.PORT) || 8080;
 const host = process.env.HOST || '127.0.0.1';
 

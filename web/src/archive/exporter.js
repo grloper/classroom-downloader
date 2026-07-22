@@ -59,15 +59,15 @@ export function triggerDownload(blob, filename) {
  * Try to build a self-contained inline share link (archive encoded in the URL).
  * Returns { ok, url } or { ok:false, reason } when the archive is too large.
  */
-export function buildInlineShareLink(archive, baseUrl = location.origin + location.pathname) {
+export async function buildInlineShareLink(archive, baseUrl = location.origin + location.pathname) {
   const shareable = makeShareable(archive);
-  const encoded = encodeSharePayload(shareable);
+  const encoded = await encodeSharePayload(shareable);
   const approxBytes = encoded.length;
   if (approxBytes > config.maxInlineShareBytes) {
     return {
       ok: false,
-      reason: `This archive is too large for an inline link (${Math.round(approxBytes / 1024)} KB). ` +
-        `Download the .zip and host it, then share a “?src=” link to the file.`
+      reason: `This archive is too large for a compressed inline link (${Math.round(approxBytes / 1024)} KB). ` +
+        `Download the .zip and host it on Drive, Dropbox, or GitHub, then share a “?src=” link to the file.`
     };
   }
   return { ok: true, url: `${stripHash(baseUrl)}#/view?data=${encoded}` };

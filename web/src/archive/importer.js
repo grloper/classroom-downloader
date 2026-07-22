@@ -68,8 +68,8 @@ export async function importFromUrl(url) {
   return importJsonText(await res.text(), 'url');
 }
 
-export function importFromShareData(encoded) {
-  const archive = decodeSharePayload(encoded);
+export async function importFromShareData(encoded) {
+  const archive = await decodeSharePayload(encoded);
   return new LoadedArchive(archive, new Map());
 }
 
