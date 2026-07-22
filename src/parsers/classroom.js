@@ -123,10 +123,16 @@ export function extractAttachments(materials = [], materialId) {
   const attachments = [];
 
   for (const material of materials || []) {
+    if (!material) continue;
     if (material.driveFile) attachments.push(normalizeDriveAttachment(materialId, material.driveFile));
-    if (material.link) attachments.push(normalizeLinkAttachment(materialId, material.link));
-    if (material.youtubeVideo) attachments.push(normalizeYoutubeAttachment(materialId, material.youtubeVideo));
-    if (material.form) attachments.push(normalizeFormAttachment(materialId, material.form));
+    else if (material.link) attachments.push(normalizeLinkAttachment(materialId, material.link));
+    else if (material.youtubeVideo) attachments.push(normalizeYoutubeAttachment(materialId, material.youtubeVideo));
+    else if (material.form) attachments.push(normalizeFormAttachment(materialId, material.form));
+    else if (material.id || material.alternateLink || material.webViewLink) {
+      attachments.push(normalizeDriveAttachment(materialId, material));
+    } else if (material.url || material.href) {
+      attachments.push(normalizeLinkAttachment(materialId, material));
+    }
   }
 
   return attachments;

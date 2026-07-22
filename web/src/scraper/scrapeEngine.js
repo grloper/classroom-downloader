@@ -187,34 +187,36 @@ async function downloadNonDriveAttachments({ entities, files, onProgress, signal
       try {
         let blob, mimeType, ext;
         
+        const targetUrl = attachment.source_url || attachment.download_url || attachment.url || '';
+
         if (attachment.provider === 'link') {
           try {
-            const res = await fetch(attachment.url, { signal });
+            const res = await fetch(targetUrl, { signal });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             blob = await res.blob();
             mimeType = blob.type.split(';')[0];
             ext = guessExtFromMime(mimeType) || 'html';
           } catch (err) {
             // Fall back to .url shortcut
-            const shortcut = saveUrlShortcut(attachment.url);
+            const shortcut = saveUrlShortcut(targetUrl);
             blob = shortcut.blob;
             mimeType = shortcut.mimeType;
             ext = 'url';
           }
         } else if (attachment.provider === 'youtube' || attachment.provider === 'form') {
-          const shortcut = saveUrlShortcut(attachment.url);
+          const shortcut = saveUrlShortcut(targetUrl);
           blob = shortcut.blob;
           mimeType = shortcut.mimeType;
           ext = 'url';
         } else {
           // Fallback for unknown provider
-          const shortcut = saveUrlShortcut(attachment.url || '');
+          const shortcut = saveUrlShortcut(targetUrl);
           blob = shortcut.blob;
           mimeType = shortcut.mimeType;
           ext = 'url';
         }
 
-        const baseName = safeSegment(attachment.title || attachment.id || attachment.provider);
+        const baseName = safeSegment(attachment.filename || attachment.title || attachment.id || attachment.provider);
         const filename = `${baseName}.${ext}`;
         const dir = materialDir(entities, attachment);
         const relPath = uniquePath(joinPath(dir, filename), usedPaths);
@@ -233,7 +235,7 @@ async function downloadNonDriveAttachments({ entities, files, onProgress, signal
       } catch (err) {
         failed += 1;
         Object.assign(attachment, { status: 'failed', skipped_reason: err.message });
-        onProgress({ phase: 'warn', message: `Could not process ${attachment.title || attachment.url}: ${err.message}` });
+        onProgress({ phase: 'warn', message: `Could not process ${attachment.filename || attachment.title || targetUrl}: ${err.message}` });
       } finally {
         done += 1;
         onProgress({ phase: 'download', message: `Downloaded ${done}/${total} non-Drive items`, current: done, total });

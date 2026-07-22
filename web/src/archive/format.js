@@ -53,7 +53,7 @@ export function buildGraph({ courses = [], topics = [], materials = [], attachme
       due_date: m.due_date ?? null,
       source_url: m.source_url ?? null,
       local_path: m.local_path ?? null,
-      attachments: attachmentsByMaterial.get(m.id) || []
+      attachments: attachmentsByMaterial.get(m.id) || m.attachments || []
     });
     materialsByTopic.set(topicKey, list);
   }
@@ -173,8 +173,8 @@ export function sanitizeGraph(graph) {
             mime_type: a.mime_type || '',
             provider: a.provider || 'link',
             file_id: a.file_id ?? null,
-            source_url: a.source_url ?? null,
-            download_url: a.download_url ?? null,
+            source_url: a.source_url ?? a.download_url ?? a.url ?? null,
+            download_url: a.download_url ?? a.source_url ?? a.url ?? null,
             status: a.status ?? 'pending',
             bytes: a.bytes ?? null,
             skipped_reason: a.skipped_reason ?? null,
