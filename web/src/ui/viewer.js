@@ -241,8 +241,15 @@ export function renderViewer(loaded) {
     if (mat.due_date) {
       meta.push(el('span', { class: 'badge due' }, [icon('calendar', { size: 13 }), dueLabel(mat.due_date) || formatDate(mat.due_date)]));
     }
-    if (mat.source_url) {
-      meta.push(el('a', { class: 'badge', href: mat.source_url, target: '_blank', rel: 'noopener' }, [icon('external', { size: 13 }), 'Open in Classroom']));
+    const classroomUrl = mat.source_url || mat.alternateLink || mat.url || (mat.raw && mat.raw.alternateLink) || buildClassroomItemUrl(mat);
+    if (classroomUrl) {
+      meta.push(el('a', {
+        class: 'badge',
+        href: classroomUrl,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        onClick: (e) => e.stopPropagation()
+      }, [icon('external', { size: 13 }), 'Open in Classroom']));
     }
 
     const body = [
@@ -336,4 +343,20 @@ function emptyState(title, subtitle) {
     el('h3', {}, title),
     el('p', { class: 'muted' }, subtitle)
   ]);
+}
+
+function buildClassroomItemUrl(mat) {
+  if (!mat || !mat.id) return null;
+  const parts = String(mat.id).split(':');
+  if (parts.length >= 3) {
+    const courseId = parts[0];
+    const type = parts[1];
+    const itemRealId = parts.slice(2).join(':');
+    if (type === 'courseWork') return `https://classroom.google.com/c/${courseId}/a/${itemRealId}`;
+    if (type === 'material') return `https://classroom.google.com/c/${courseId}/m/${itemRealId}`;
+    if (type === 'announcement') return `https://classroom.google.com/c/${courseId}/p/${itemRealId}`;
+    return `https://classroom.google.com/c/${courseId}`;
+  }
+  if (mat.course_id) return `https://classroom.google.com/c/${mat.course_id}`;
+  return null;
 }
