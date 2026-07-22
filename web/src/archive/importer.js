@@ -88,7 +88,13 @@ async function importZipBlob(blob) {
   const JSZip = await loadJsZip();
   const zip = await JSZip.loadAsync(blob);
 
-  const manifest = zip.file('manifest.json') || zip.file('master_index.json');
+  let manifest = zip.file('manifest.json') || zip.file('master_index.json');
+  if (!manifest) {
+    const fileKeys = Object.keys(zip.files || {});
+    const found = fileKeys.find((f) => f.endsWith('/manifest.json') || f.endsWith('/master_index.json') || f === 'manifest.json' || f === 'master_index.json');
+    if (found) manifest = zip.file(found);
+  }
+
   if (!manifest) {
     throw new Error('This .zip is missing manifest.json / master_index.json — is it a Classroom Archiver export?');
   }
@@ -98,12 +104,15 @@ async function importZipBlob(blob) {
   const files = new Map();
   const entries = [];
   zip.forEach((relativePath, entry) => {
-    if (!entry.dir && relativePath.startsWith('files/')) entries.push({ relativePath, entry });
+    if (!entry.dir && relativePath.includes('files/')) {
+      const cleanPath = relativePath.slice(relativePath.indexOf('files/') + 6);
+      if (cleanPath) entries.push({ cleanPath, entry });
+    }
   });
   await Promise.all(
-    entries.map(async ({ relativePath, entry }) => {
+    entries.map(async ({ cleanPath, entry }) => {
       const fileBlob = await entry.async('blob');
-      files.set(relativePath.replace(/^files\//, ''), fileBlob);
+      files.set(cleanPath, fileBlob);
     })
   );
 

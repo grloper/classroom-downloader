@@ -89,14 +89,13 @@ async function route() {
       return loadInto(() => importFromUrl(params.get('src')), 'Loading archive…');
     }
     if (state.loaded) return show(renderViewer(state.loaded));
-    return loadInto(() => importFromUrl(new URL('sample/demo-archive.json', document.baseURI).toString()), 'Opening viewer…');
   }
 
-  // Landing
+  // Landing / Import view if no active archive
   setLoaded(null);
   show(renderLanding({
     onFile: (file) => loadInto(() => importFile(file), 'Opening archive…'),
-    onUrl: (url) => { navigate(`#/view?src=${encodeURIComponent(url)}`); },
+    onUrl: (url) => navigate(`#/view?src=${encodeURIComponent(url)}`),
     onDemo: () => navigate('#/demo'),
     onScrape: () => navigate('#/scrape')
   }));
@@ -107,12 +106,15 @@ async function loadInto(loader, message) {
   try {
     const loaded = await loader();
     setLoaded(loaded);
-    show(renderViewer(loaded));
+    if (location.hash !== '#/view') {
+      location.hash = '#/view';
+    } else {
+      show(renderViewer(loaded));
+    }
   } catch (err) {
     console.error(err);
     toast(err.message || 'Could not open that archive.', 'error', 6000);
     setLoaded(null);
-    // Fall back to landing without a redirect loop.
     show(renderLanding({
       onFile: (file) => loadInto(() => importFile(file), 'Opening archive…'),
       onUrl: (url) => navigate(`#/view?src=${encodeURIComponent(url)}`),
