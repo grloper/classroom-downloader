@@ -70,8 +70,25 @@ function normalizeDriveAttachment(materialId, driveFile) {
   };
 }
 
+export function extractDriveFileId(url) {
+  if (!url || typeof url !== 'string') return null;
+  const m1 = url.match(/\/(?:d|folders|file\/d|document\/d|presentation\/d|spreadsheets\/d)\/([a-zA-Z0-9_-]{15,})/);
+  if (m1) return m1[1];
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+  if (m2) return m2[1];
+  return null;
+}
+
 function normalizeLinkAttachment(materialId, link) {
-  const url = link.url || link.href;
+  const url = link.url || link.href || '';
+  const fileId = extractDriveFileId(url);
+  if (fileId) {
+    return normalizeDriveAttachment(materialId, {
+      id: fileId,
+      title: link.title || 'Drive File',
+      alternateLink: url
+    });
+  }
   const id = `${materialId}:link:${hash(url)}`;
   return {
     id,

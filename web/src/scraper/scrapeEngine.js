@@ -24,7 +24,8 @@ import {
   normalizeTopic,
   normalizeCourseWork,
   normalizeCourseWorkMaterial,
-  normalizeAnnouncement
+  normalizeAnnouncement,
+  extractDriveFileId
 } from './normalize.js';
 import { safeSegment, joinPath, uniquePath } from '../util/paths.js';
 import { config as defaultConfig } from '../../config.js';
@@ -86,6 +87,18 @@ export async function scrapeClassroom({
     ];
     entities.materials.push(...materials);
     for (const material of materials) entities.attachments.push(...material.attachments);
+  }
+
+  // Auto-promote any link attachment pointing to Google Drive / Docs / Slides / Sheets to a Drive attachment
+  for (const a of entities.attachments) {
+    if (!a.file_id) {
+      const url = a.source_url || a.download_url || a.url || '';
+      const driveId = extractDriveFileId(url);
+      if (driveId) {
+        a.file_id = driveId;
+        a.provider = 'drive';
+      }
+    }
   }
 
   onProgress({

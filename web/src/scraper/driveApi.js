@@ -57,6 +57,26 @@ async function downloadBinaryFile(session, fileId, signal) {
  *   { filename, mimeType, bytes, blob, metadata }
  * where `blob` is the primary file bytes ready to be added to the export zip.
  */
+export function guessExtFromMime(mime) {
+  if (!mime) return null;
+  const m = mime.toLowerCase();
+  if (m.includes('pdf')) return 'pdf';
+  if (m.includes('wordprocessingml') || m.includes('msword')) return 'docx';
+  if (m.includes('presentationml') || m.includes('ms-powerpoint')) return 'pptx';
+  if (m.includes('spreadsheetml') || m.includes('ms-excel')) return 'xlsx';
+  if (m.includes('html')) return 'html';
+  if (m.includes('jpeg') || m.includes('jpg')) return 'jpg';
+  if (m.includes('png')) return 'png';
+  if (m.includes('gif')) return 'gif';
+  if (m.includes('svg')) return 'svg';
+  if (m.includes('webp')) return 'webp';
+  if (m.includes('zip')) return 'zip';
+  if (m.includes('csv')) return 'csv';
+  if (m.includes('json')) return 'json';
+  if (m.includes('text/plain')) return 'txt';
+  return null;
+}
+
 export async function downloadDriveAttachment(session, attachment, { signal } = {}) {
   if (!attachment.file_id) throw new Error(`Attachment ${attachment.id} has no Drive file id`);
   const metadata = await getFileMetadata(session, attachment.file_id, { signal });
@@ -77,7 +97,11 @@ export async function downloadDriveAttachment(session, attachment, { signal } = 
   }
 
   const blob = await downloadBinaryFile(session, attachment.file_id, signal);
-  const ext = extname(metadata.name || '') || '';
+  let ext = extname(metadata.name || '') || '';
+  if (!ext) {
+    const guessed = guessExtFromMime(metadata.mimeType || blob.type || '');
+    if (guessed) ext = `.${guessed}`;
+  }
   return {
     filename: `${base}${ext}`,
     mimeType: metadata.mimeType || blob.type || 'application/octet-stream',
