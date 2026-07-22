@@ -102,6 +102,24 @@ export function renderViewer(loaded) {
       }, icon('chevron', { size: 12 }))
     ]);
 
+    function courseItem(course, active, iconName) {
+      return el('div', {
+        class: `course-item${active ? ' active' : ''}`,
+        onClick: () => {
+          selectedCourseId = course.id;
+          selectedTopicId = null;
+          filters.courseId = course.id;
+          renderSidebar();
+          renderContent();
+          sidebar.parentElement?.querySelector('.main')?.scrollTo?.({ top: 0 });
+        }
+      }, [
+        icon(iconName, { size: 17 }),
+        el('span', { class: 'ci-name' }, course.name),
+        el('span', { class: 'ci-count' }, String(course.count))
+      ]);
+    }
+
     const items = [titleRow];
     items.push(courseItem({ id: null, name: 'All courses', count: counts.materials }, selectedCourseId === null, 'home'));
 
