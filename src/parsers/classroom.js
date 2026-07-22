@@ -155,8 +155,22 @@ export function extractAttachments(materials = [], materialId) {
   return attachments;
 }
 
-export function normalizeCourseWork(courseId, courseWork) {
+export function normalizeCourseWork(courseId, courseWork, submissions = []) {
   const id = `${courseId}:courseWork:${courseWork.id}`;
+  const attachments = extractAttachments(courseWork.materials, id);
+
+  for (const sub of submissions || []) {
+    const subAttachments = sub.assignmentSubmission?.attachments || [];
+    for (const a of subAttachments) {
+      const extracted = extractAttachments([a], id);
+      extracted.forEach((att) => {
+        att.filename = `[My Submission] ${att.filename}`;
+        att.is_submission = true;
+        attachments.push(att);
+      });
+    }
+  }
+
   return {
     id,
     course_id: courseId,
@@ -168,7 +182,7 @@ export function normalizeCourseWork(courseId, courseWork) {
     local_path: null,
     source_url: courseWork.alternateLink || null,
     raw: courseWork,
-    attachments: extractAttachments(courseWork.materials, id)
+    attachments
   };
 }
 

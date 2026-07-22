@@ -13,6 +13,10 @@ export function renderViewer(loaded) {
   const graph = loaded.graph;
   const filters = emptyFilters();
   let selectedCourseId = null; // null → all courses
+  let selectedTopicId = null;
+  const expandedSidebarCourses = new Set();
+  const collapsedTopics = new Set();
+  let allTopicsCollapsed = false;
 
   const allTypes = collectTypes(graph);
   const allProviders = collectProviders(graph);
@@ -40,7 +44,19 @@ export function renderViewer(loaded) {
     filters.downloadedOnly = !filters.downloadedOnly;
   }, () => filters.downloadedOnly);
 
+  const collapseAllChip = chip(allTopicsCollapsed ? 'Expand All Topics' : 'Collapse All Topics', () => {
+    allTopicsCollapsed = !allTopicsCollapsed;
+    if (allTopicsCollapsed) {
+      for (const c of graph.courses) {
+        for (const t of c.topics) collapsedTopics.add(t.id);
+      }
+    } else {
+      collapsedTopics.clear();
+    }
+  }, () => allTopicsCollapsed);
+
   const filterRow = el('div', { class: 'filter-row' }, [
+    collapseAllChip,
     allTypes.length ? el('span', { class: 'filter-label' }, 'Type') : null,
     ...typeChips,
     allProviders.length ? el('span', { class: 'filter-label', style: { marginLeft: '6px' } }, 'Source') : null,
@@ -68,35 +84,101 @@ export function renderViewer(loaded) {
   // ---- Sidebar ----
   function renderSidebar() {
     const counts = countGraph(graph);
-    const items = [el('div', { class: 'sidebar-title' }, `Courses · ${counts.courses}`)];
+    const titleRow = el('div', { class: 'sidebar-header' }, [
+      el('div', { class: 'sidebar-title' }, `Courses · ${counts.courses}`),
+      el('button', {
+        class: 'btn tiny ghost',
+        title: 'Toggle expand all sidebar topics',
+        onClick: (e) => {
+          e.stopPropagation();
+          if (expandedSidebarCourses.size === graph.courses.length) {
+            expandedSidebarCourses.clear();
+          } else {
+            graph.courses.forEach((c) => expandedSidebarCourses.add(c.id));
+          }
+          renderSidebar();
+        }
+      }, icon('chevron', { size: 12 }))
+    ]);
+
+    const items = [titleRow];
     items.push(courseItem({ id: null, name: 'All courses', count: counts.materials }, selectedCourseId === null, 'home'));
+
     for (const c of graph.courses) {
       let items2 = 0;
       for (const t of c.topics) items2 += t.materials.length;
-      items.push(courseItem({ id: c.id, name: c.name, count: items2 }, selectedCourseId === c.id, 'book'));
+
+      const isExpanded = expandedSidebarCourses.has(c.id);
+      const isActive = selectedCourseId === c.id && !selectedTopicId;
+      
+      const toggleBtn = el('span', {
+        class: 'ci-toggle',
+        onClick: (e) => {
+          e.stopPropagation();
+          if (isExpanded) expandedSidebarCourses.delete(c.id);
+          else expandedSidebarCourses.add(c.id);
+          renderSidebar();
+        }
+      }, icon(isExpanded ? 'chevron-down' : 'chevron', { size: 13 }));
+
+      const cItem = el('div', {
+        class: `course-item${isActive ? ' active' : ''}`,
+        onClick: () => {
+          selectedCourseId = c.id;
+          selectedTopicId = null;
+          filters.courseId = c.id;
+          renderSidebar();
+          renderContent();
+          sidebar.parentElement?.querySelector('.main')?.scrollTo?.({ top: 0 });
+        }
+      }, [
+        c.topics.length ? toggleBtn : el('span', { style: { width: '13px' } }),
+        icon('book', { size: 16 }),
+        el('span', { class: 'ci-name' }, c.name),
+        el('span', { class: 'ci-count' }, String(items2))
+      ]);
+
+      items.push(cItem);
+
+      if (isExpanded && c.topics.length) {
+        const topicNodes = c.topics.map((t) => {
+          const isTopicActive = selectedCourseId === c.id && selectedTopicId === t.id;
+          return el('div', {
+            class: `sidebar-topic-item${isTopicActive ? ' active' : ''}`,
+            onClick: () => {
+              selectedCourseId = c.id;
+              selectedTopicId = t.id;
+              filters.courseId = c.id;
+              renderSidebar();
+              renderContent();
+              setTimeout(() => {
+                const elTopic = document.getElementById(`topic-${t.id}`);
+                if (elTopic) elTopic.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 50);
+            }
+          }, [
+            icon('folder', { size: 13 }),
+            el('span', { class: 'sti-title' }, t.title),
+            el('span', { class: 'sti-count' }, String(t.materials.length))
+          ]);
+        });
+        items.push(el('div', { class: 'sidebar-topics' }, topicNodes));
+      }
     }
     mount(sidebar, items);
-  }
-  function courseItem(course, active, iconName) {
-    return el('div', {
-      class: `course-item${active ? ' active' : ''}`,
-      onClick: () => {
-        selectedCourseId = course.id;
-        filters.courseId = course.id;
-        renderSidebar();
-        renderContent();
-        sidebar.parentElement?.querySelector('.main')?.scrollTo?.({ top: 0 });
-      }
-    }, [
-      icon(iconName, { size: 17 }),
-      el('span', { class: 'ci-name' }, course.name),
-      el('span', { class: 'ci-count' }, String(course.count))
-    ]);
   }
 
   // ---- Content ----
   function renderContent() {
     const filtered = applyFilters(graph, filters);
+
+    if (selectedTopicId) {
+      filtered.courses.forEach((c) => {
+        c.topics = c.topics.filter((t) => t.id === selectedTopicId);
+      });
+      filtered.courses = filtered.courses.filter((c) => c.topics.length);
+    }
+
     const counts = countGraph(filtered);
 
     if (!filtered.courses.length) {
@@ -105,8 +187,7 @@ export function renderViewer(loaded) {
     }
 
     const nodes = [];
-    // Stats only in "all" view; a single course shows its own hero.
-    if (selectedCourseId === null) {
+    if (selectedCourseId === null && !selectedTopicId) {
       nodes.push(statRow(counts, loaded.hasFiles));
     }
     for (const course of filtered.courses) {
@@ -128,15 +209,29 @@ export function renderViewer(loaded) {
   }
 
   function renderTopic(topic) {
-    return el('div', { class: 'topic' }, [
-      el('div', { class: 'topic-head' }, [
-        icon('folder', { size: 15 }),
-        topic.title,
-        el('span', { class: 'th-line' }),
-        el('span', { class: 'small muted' }, `${topic.materials.length}`)
-      ]),
-      ...topic.materials.map(renderMaterial)
+    const isCollapsed = collapsedTopics.has(topic.id);
+    const head = el('div', {
+      class: 'topic-head',
+      style: { cursor: 'pointer', userSelect: 'none' },
+      onClick: () => {
+        if (isCollapsed) collapsedTopics.delete(topic.id);
+        else collapsedTopics.add(topic.id);
+        renderContent();
+      }
+    }, [
+      icon(isCollapsed ? 'chevron' : 'chevron-down', { size: 14 }),
+      icon('folder', { size: 15 }),
+      topic.title,
+      el('span', { class: 'th-line' }),
+      el('span', { class: 'small muted' }, `${topic.materials.length} items`)
     ]);
+
+    const mats = isCollapsed ? null : topic.materials.map(renderMaterial);
+
+    return el('div', { class: 'topic', id: `topic-${topic.id}` }, [
+      head,
+      mats ? el('div', { class: 'topic-materials' }, mats) : null
+    ].filter(Boolean));
   }
 
   function renderMaterial(mat) {
@@ -169,12 +264,18 @@ export function renderViewer(loaded) {
 
   function renderAttachment(att) {
     const downloaded = att.status === 'complete' && att.local_path;
+    const isSubmission = att.is_submission || (att.filename && att.filename.startsWith('[My Submission]'));
     const classes = ['attach'];
     if (downloaded) classes.push('downloaded');
     if (!downloaded && !att.source_url && !att.download_url) classes.push('reference');
-    const sub = downloaded
+    
+    let sub = downloaded
       ? `${providerLabel(att.provider)} · ${bytesToSize(att.bytes)}`
       : att.source_url || att.download_url ? `${providerLabel(att.provider)} · opens source` : providerLabel(att.provider);
+
+    if (isSubmission) sub = `Submission · ${sub}`;
+
+    const cleanTitle = att.filename.replace(/^\[My Submission\]\s*/, '');
 
     return el('button', {
       class: classes.join(' '),
@@ -183,7 +284,10 @@ export function renderViewer(loaded) {
     }, [
       el('div', { class: 'attach-ic' }, icon(providerIcon(att.provider), { size: 16 })),
       el('div', { class: 'attach-info' }, [
-        el('div', { class: 'attach-name' }, att.filename),
+        el('div', { class: 'attach-name' }, [
+          isSubmission ? el('span', { class: 'badge small', style: { marginRight: '6px', background: 'var(--primary-soft)', color: 'var(--primary-strong)' } }, 'My Submission') : null,
+          cleanTitle
+        ].filter(Boolean)),
         el('div', { class: 'attach-sub' }, sub)
       ]),
       icon(downloaded ? 'eye' : 'external', { size: 15 })

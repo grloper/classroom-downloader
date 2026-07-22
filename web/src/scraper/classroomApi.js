@@ -77,4 +77,14 @@ export function listAnnouncements(session, courseId, opts) {
   );
 }
 
+export function listStudentSubmissions(session, courseId, courseWorkId, opts) {
+  return listAll(
+    session,
+    `/courses/${courseId}/courseWork/${courseWorkId}/studentSubmissions`,
+    'studentSubmissions',
+    { userId: 'me' },
+    opts
+  );
+}
+
 export { safeList };

@@ -16,6 +16,7 @@ import {
   listCourseWork,
   listCourseWorkMaterials,
   listAnnouncements,
+  listStudentSubmissions,
   safeList
 } from './classroomApi.js';
 import { downloadDriveAttachment } from './driveApi.js';
@@ -69,6 +70,18 @@ export async function scrapeClassroom({
     topics.forEach((topic, idx) => entities.topics.push(normalizeTopic(course.id, topic, idx)));
 
     const courseWork = await safeList(`coursework for ${course.id}`, () => listCourseWork(session, course.id, { signal }), warn);
+    
+    const normalizedCourseWork = await Promise.all(
+      courseWork.map(async (item) => {
+        const subs = await safeList(
+          `submissions for ${item.id}`,
+          () => listStudentSubmissions(session, course.id, item.id, { signal }),
+          warn
+        );
+        return normalizeCourseWork(course.id, item, subs);
+      })
+    );
+
     const courseWorkMaterials = await safeList(
       `materials for ${course.id}`,
       () => listCourseWorkMaterials(session, course.id, { signal }),
@@ -81,7 +94,7 @@ export async function scrapeClassroom({
     );
 
     const materials = [
-      ...courseWork.map((item) => normalizeCourseWork(course.id, item)),
+      ...normalizedCourseWork,
       ...courseWorkMaterials.map((item) => normalizeCourseWorkMaterial(course.id, item)),
       ...announcements.map((item) => normalizeAnnouncement(course.id, item))
     ];
